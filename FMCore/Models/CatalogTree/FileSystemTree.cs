@@ -6,7 +6,7 @@ using System.Text;
 
 namespace FMCore.Models.CatalogTree
 {
-    internal class CatalogTree
+    internal class FileSystemTree
     {
         /* ПОЛЯ */
         private StringBuilder _sb;     // StringBuilder для промежуточного хранения дерева каталогов (очищается перед возвратом контента)
@@ -91,7 +91,7 @@ namespace FMCore.Models.CatalogTree
 
 
         /* КОНСТРУКТОРЫ */
-        public CatalogTree(string rootCatalog)
+        public FileSystemTree(string rootCatalog)
         {
             _sb = new StringBuilder();
             CurrentDir = new DirectoryInfo(rootCatalog);
