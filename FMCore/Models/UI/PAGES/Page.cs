@@ -38,7 +38,7 @@ namespace FMCore.Models.UI.Pages
                     _currentDir = value;
                     FsTree = new FileSystemTree(this.CurrentDir);
                     this.PageContent = new List<string>(FsTree.Tree.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
-                    maxIndex = PageContent.Count - textHeight;
+                    maxIndex = PageContent.Count - 1;
                 }
             }
         }       // Если используется сеттер свойства, то кроме того, что изменяется поле _currentDir - еще и заново выстариваются дерево и контент страницы
@@ -94,26 +94,39 @@ namespace FMCore.Models.UI.Pages
 
 
             // Высчитываем строки, которые нужно показать
-            if ((currIndex + textHeight - 1) < PageContent.Count)
+            if ((currIndex < (textHeight - 1)) && (PageContent.Count >= (textHeight - 1)))
             {
-                cuttedPageContent = PageContent.GetRange(currIndex, textHeight - 1).ToArray();
+                cuttedPageContent = PageContent.GetRange(0, textHeight - 1).ToArray();
+                Console.SetCursorPosition(2, 1);
+                for (int i = 0; i < cuttedPageContent.Length; i++)
+                {
+                    if (i == currIndex)
+                    {
+                        ConsoleUtils.WriteColoredAt(cuttedPageContent[i], ConsoleColor.DarkGreen, 2, 1 + i);
+                    }
+                    else
+                    {
+                        ConsoleUtils.WriteAt(cuttedPageContent[i], 2, 1 + i);
+                    }
+                }
             }
             else
             {
-                cuttedPageContent = PageContent.GetRange(currIndex, PageContent.Count - textHeight - 1).ToArray();
-            }
-
-            Console.SetCursorPosition(2, 1);
-            // Пишем строки в консоль
-            for (int i = 0; i < cuttedPageContent.Length; i++)
-            {
-                if (i == currIndex)
+                if (PageContent.Count >= currIndex)
                 {
-                    ConsoleUtils.WriteColoredAt(cuttedPageContent[i], ConsoleColor.DarkGreen, 2, 1 + i);
-                }
-                else
-                {
-                    ConsoleUtils.WriteAt(cuttedPageContent[i], 2, 1 + i);
+                    cuttedPageContent = PageContent.GetRange(currIndex, PageContent.Count - textHeight - 1).ToArray();
+                    Console.SetCursorPosition(2, 1);
+                    for (int i = 0; i < cuttedPageContent.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            ConsoleUtils.WriteColoredAt(cuttedPageContent[i], ConsoleColor.DarkGreen, 2, 1 + i);
+                        }
+                        else
+                        {
+                            ConsoleUtils.WriteAt(cuttedPageContent[i], 2, 1 + i);
+                        }
+                    }
                 }
             }
         }
