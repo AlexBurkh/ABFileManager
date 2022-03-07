@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -13,18 +14,45 @@ namespace FMCore.Models.UI.Pages
 {
     public class Page
     {
-        static readonly int textHeight = 30;
-        static readonly int pageHeight = 40;
-        static readonly int pageWidth = 80;
-        CommonBorder commonBorder { get; set; }
-        PropertiesBorder propertiesBorder { get; set; }
-        FileSystemTree tree { get; set; }
-        List<string> pageContent { get; set; }
+        /* ПОЛЯ */
+        private string _currentDir;
+        /* Статические неизменяемые */
+        static readonly int textHeight = 30;    // Количество строк, выделенных под отрисовку контента страницы
+        static readonly int pageHeight = 40;    // Количество строк, выделенных под отрисовку окна в целом
+        static readonly int pageWidth = 80;     // Количество столбцов, выделенных под отрисовку окна в целом
 
-        string currentDir { get; set; }
 
-        public void Print(int currIndex)
+        /* СВОЙСТВА */
+        // Устанавливаются в конструкторе
+        CommonBorder CommonBorder { get; set; }     
+        PropertiesBorder PropertiesBorder { get; set; }
+        // Устанавливаются в методе ScanTreeAndSetupProperties() внутри метода Print()
+        // - для возможности динамического иззменения выбранного корневого каталога
+        string CurrentDir
         {
+            get { return _currentDir; }
+            set
+            {
+                if (Directory.Exists(value))
+                {
+                    _currentDir = value;
+                    FsTree = new FileSystemTree(this.CurrentDir);
+                    this.PageContent = new List<string>(FsTree.Tree.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+                    maxIndex = PageContent.Count - textHeight;
+                }
+            }
+        }       // Если используется сеттер свойства, то кроме того, что изменяется поле _currentDir - еще и заново выстариваются дерево и контент страницы
+        FileSystemTree FsTree { get; set; }     // Дерево ФС
+        List<string> PageContent { get; set; }      // Контент страницы (строки дерева, которые подлежат размещению на странице)
+        public int maxIndex { get; private set; }
+        
+
+        /* МЕТОДЫ */
+        /* Public */
+        public void Print(int currIndex, string currentDirPath = "")
+        {
+            // Координаты точек окна консоли
+
             int xTop = 0;
             int yTop = 0;
 
@@ -34,49 +62,69 @@ namespace FMCore.Models.UI.Pages
             int xBot = 0;
             int yBot = 39;
 
+            // Определение текущего каталога и установка значения свойств: currentDir и pageContent
+            if (!string.IsNullOrWhiteSpace(currentDirPath))
+            {
+                this.CurrentDir = currentDirPath;
+            }
+
             // Ограничиваем размеры окна
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Console.SetWindowSize(pageWidth, pageHeight);
-                Console.SetBufferSize(pageWidth, pageHeight);       
+                Console.SetWindowSize(pageWidth, pageHeight + 5); // +5 - на время работы в студии
+                Console.SetBufferSize(pageWidth, pageHeight + 5); // +5 - на время работы в студии      
             }
 
-            string commonBorderString = commonBorder.Draw();
-            string propBorderString = propertiesBorder.Draw();
+            /* Отрисовка границ */
+            ConsoleUtils.WriteAt(CommonBorder.Draw(), xTop, yTop);       // Отрисовка внешней границы
+            ConsoleUtils.WriteAt(PropertiesBorder.Draw(), xProp, yProp);       // Отрисовка границы окна свойств
 
-            ConsoleUtils.WriteAt(commonBorderString, xTop, yTop);
-            ConsoleUtils.WriteAt(propBorderString, xProp, yProp);
             Console.SetCursorPosition(xTop, yTop);
 
+            /* Отрисовка контента страницы */
+            PrintPageContext(currIndex);
+
+            /* Возвращение картеки */
+            Console.SetCursorPosition(xBot, yBot);
+        }
+        /* Private */
+        private void PrintPageContext(int currIndex)
+        {
             string[] cuttedPageContent;
 
+
             // Высчитываем строки, которые нужно показать
-            if ((currIndex + textHeight - 1) < pageContent.Count)
+            if ((currIndex + textHeight - 1) < PageContent.Count)
             {
-                cuttedPageContent = pageContent.GetRange(currIndex, textHeight - 1).ToArray();
+                cuttedPageContent = PageContent.GetRange(currIndex, textHeight - 1).ToArray();
             }
             else
             {
-                cuttedPageContent = pageContent.GetRange(currIndex, pageContent.Count - textHeight - 1).ToArray();
+                cuttedPageContent = PageContent.GetRange(currIndex, PageContent.Count - textHeight - 1).ToArray();
             }
 
-            Console.SetCursorPosition(2, 2);
+            Console.SetCursorPosition(2, 1);
             // Пишем строки в консоль
             for (int i = 0; i < cuttedPageContent.Length; i++)
             {
-                ConsoleUtils.WriteAt(cuttedPageContent[i], 2, 1 + i);
+                if (i == currIndex)
+                {
+                    ConsoleUtils.WriteColoredAt(cuttedPageContent[i], ConsoleColor.DarkGreen, 2, 1 + i);
+                }
+                else
+                {
+                    ConsoleUtils.WriteAt(cuttedPageContent[i], 2, 1 + i);
+                }
             }
-
-            Console.SetCursorPosition(xBot, yBot);
         }
+        
 
+        /* КОНСТРУКТОРЫ */
         public Page(string dir)
         {
-            currentDir = dir;
-            tree = new FileSystemTree(this.currentDir);
-            this.pageContent = new List<string>(tree.Tree.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
-            this.commonBorder = new CommonBorder(pageHeight, pageWidth);
-            this.propertiesBorder = new PropertiesBorder(pageWidth);
+            CurrentDir = dir;
+            this.CommonBorder = new CommonBorder(pageHeight, pageWidth);
+            this.PropertiesBorder = new PropertiesBorder(pageWidth);
         }
     }
 }

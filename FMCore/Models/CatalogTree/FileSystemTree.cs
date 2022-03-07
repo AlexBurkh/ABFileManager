@@ -32,7 +32,7 @@ namespace FMCore.Models.CatalogTree
         {
             get
             {
-                BuildTree(CurrentDir.FullName);
+                BuildTree();
                 string result = _sb.ToString();
                 _sb.Clear();
                 return result;
@@ -42,12 +42,9 @@ namespace FMCore.Models.CatalogTree
 
         /* МЕТОДЫ */
         /* Public */
-        private void BuildTree(string rootPath, string prefix = "\t")
+        private void BuildTree(string prefix = "\t")
         {
-            this._sb.AppendLine($"{prefix}{CurrentDir}");
-
-            
-            DirectoryInfo di = new DirectoryInfo(rootPath);
+            DirectoryInfo di = CurrentDir;
             List<FileSystemInfo> fsItems = di.GetFileSystemInfos()
                 .OrderBy(f => f.Name)
                 .ToList();
@@ -63,7 +60,8 @@ namespace FMCore.Models.CatalogTree
                         _sb.AppendLine($"{prefix}└── {fsItem}");
                         if (IsDirectory(fsItem))
                         {
-                            BuildTree(fsItem.FullName, prefix + '\t');
+                            CurrentDir = (DirectoryInfo)fsItem;
+                            BuildTree(prefix + '\t');
                         }
                     }
                     else
@@ -71,7 +69,8 @@ namespace FMCore.Models.CatalogTree
                         _sb.AppendLine($"{prefix}├── {fsItem}");
                         if (IsDirectory(fsItem))
                         {
-                            BuildTree(fsItem.FullName, prefix + "│   ");
+                            CurrentDir = (DirectoryInfo) fsItem;
+                            BuildTree(prefix + "│   ");
                         }
                     }
                 }
@@ -82,7 +81,7 @@ namespace FMCore.Models.CatalogTree
                 Console.Error.WriteLine(ex.Message);
                 Console.ResetColor();
             }
-        }
+        }           // Составляет дерево относительно свойства CurrentDir - поля _currentDir
         /* Pricate */
         private bool IsDirectory(FileSystemInfo fsItem)
         {

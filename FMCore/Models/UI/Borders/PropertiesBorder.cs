@@ -19,15 +19,12 @@ namespace FMCore.Models.UI.Borders
             sb.Clear();
 
             sb.Append(Border.LEFTCENTER);
-            //Console.Write(LEFTCENTER);
             for (int j = 0; j < (this.borderWidth - 2); j++)
             {
                 sb.Append(Border.HORIZONTAL);
-                //Console.Write(HORIZONTAL);
             }
             sb.Append(Border.RIGHTCENTER);
             sb.Append('\n');
-            //Console.WriteLine(RIGHTCENTER);
 
             return sb.ToString();
         }
