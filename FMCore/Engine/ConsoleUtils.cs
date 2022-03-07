@@ -16,11 +16,11 @@ namespace FMCore.Engine
             Console.ForegroundColor = prevColor;
         }
 
-        public static void WriteAt(string text, int lOffset, int rOffset)
+        public static void WriteAt(string text, int lPos, int rPos)
         {
             (int currLPos, int currRPos) = Console.GetCursorPosition();
-            Console.SetCursorPosition(currLPos + lOffset, currRPos + rOffset);
-            Console.WriteLine(text);
+            Console.SetCursorPosition(lPos, rPos);
+            Console.Write(text);
         }
     }
 }

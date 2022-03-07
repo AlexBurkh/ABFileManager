@@ -20,7 +20,10 @@ namespace FMCore.Models.UI.Borders
         public int borderHeight { get; private set; }
         public int borderWidth { get; private set; }
 
-        public virtual void Draw() { }
+        public virtual string Draw()
+        {
+            return string.Empty;
+        }
 
         public Border(int height, int width) 
         {

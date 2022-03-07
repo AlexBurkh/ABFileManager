@@ -22,7 +22,7 @@ namespace FMCore.Models.CatalogTree
             }
             set
             {
-                if (Directory.Exists(_currentDir.FullName))
+                if (Directory.Exists(value.FullName))
                 {
                     _currentDir = value;
                 }
@@ -60,7 +60,7 @@ namespace FMCore.Models.CatalogTree
 
                     if (i == fsItems.Count - 1)
                     {
-                        _sb.AppendLine($"{prefix}└── fsItem");
+                        _sb.AppendLine($"{prefix}└── {fsItem}");
                         if (IsDirectory(fsItem))
                         {
                             BuildTree(fsItem.FullName, prefix + '\t');

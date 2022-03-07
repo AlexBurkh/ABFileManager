@@ -8,52 +8,27 @@ namespace FMCore.Models.UI.Borders
 {
     public class PropertiesBorder : Border
     {
-        static private readonly int propBorderHeight = 6;
+        static private readonly int propBorderHeight = 9;
 
         int xStartPos = 0;
         int yStartPos = Console.WindowHeight - propBorderHeight;
 
-        public override string ToString()
+        public override string Draw()
         {
             StringBuilder sb = new StringBuilder();
+            sb.Clear();
 
-            for (int spaceCounter = 0; spaceCounter < propBorderHeight; spaceCounter++)
+            sb.Append(Border.LEFTCENTER);
+            //Console.Write(LEFTCENTER);
+            for (int j = 0; j < (this.borderWidth - 2); j++)
             {
-                sb.AppendLine();
+                sb.Append(Border.HORIZONTAL);
+                //Console.Write(HORIZONTAL);
             }
+            sb.Append(Border.RIGHTCENTER);
+            sb.Append('\n');
+            //Console.WriteLine(RIGHTCENTER);
 
-            for (int i = 0; i < (this.borderHeight - 1); i++)
-            {
-                if (i == 0)
-                {
-                    sb.Append(Border.LEFTCENTER);
-                    for (int j = 0; j < (this.borderWidth - 2); j++)
-                    {
-                        sb.Append(Border.HORIZONTAL);
-                    }
-                    sb.Append(Border.RIGHTCENTER);
-                }
-
-                if ((i > 0) && (i < (this.borderHeight - 1)))
-                {
-                    sb.Append(Border.VERTICAL);
-                    for (int j = 0; j < (this.borderWidth - 2); j++)
-                    {
-                        sb.Append(' ');
-                    }
-                    sb.Append(Border.VERTICAL);
-                }
-
-                if (i == (this.borderHeight - 1))
-                {
-                    sb.Append(Border.LEFTBOTTOM);
-                    for (int j = 0; j < (this.borderWidth - 2); j++)
-                    {
-                        Console.Write(Border.HORIZONTAL);
-                    }
-                    sb.Append(Border.RIGHTBOTTOM);
-                }
-            }
             return sb.ToString();
         }
 

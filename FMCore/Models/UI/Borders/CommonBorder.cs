@@ -12,39 +12,43 @@ namespace FMCore.Models.UI.Borders
         public int yStartPos { get; } = 0;
 
 
-        public override string ToString()
+        public override string Draw()
         {
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < (this.borderHeight - 1); i++)
+            sb.Clear();
+            for (int i = 0; i < (this.borderHeight - 2); i++)
             {
                 if (i == 0)
                 {
-                    sb.Append(Border.LEFTTOP);
+                    sb.Append(LEFTTOP);
                     for (int j = 0; j < (this.borderWidth - 2); j++)
                     {
-                        sb.Append(Border.HORIZONTAL);
+                        sb.Append(HORIZONTAL);
                     }
-                    sb.Append(Border.RIGHTTOP);
+                    sb.Append(RIGHTTOP);
+                    sb.Append('\n');
                 }
 
                 if ((i > 0) && (i < (this.borderHeight - 1)))
                 {
-                    sb.Append(Border.VERTICAL);
+                    sb.Append(VERTICAL);
                     for (int j = 0; j < (this.borderWidth - 2); j++)
                     {
-                        sb.Append(Border.HORIZONTAL);
+                        sb.Append(' ');
                     }
-                    sb.Append(Border.VERTICAL);
+                    sb.Append(VERTICAL);
+                    sb.Append('\n');
                 }
 
-                if (i == (this.borderHeight - 1))
+                if (i == (this.borderHeight - 3))
                 {
-                    sb.Append(Border.LEFTBOTTOM);
+                    sb.Append(LEFTBOTTOM);
                     for (int j = 0; j < (this.borderWidth - 2); j++)
                     {
-                        Console.Write(Border.HORIZONTAL);
+                        sb.Append(HORIZONTAL);
                     }
-                    sb.Append(Border.RIGHTBOTTOM);
+                    sb.Append(RIGHTBOTTOM);
+                    sb.Append('\n');
                 }
             }
             return sb.ToString();

@@ -1,4 +1,6 @@
 ﻿using System;
+using FMCore.Models.UI.Pages;
+using FMCore.Models.CatalogTree;
 
 namespace FMRun
 {
@@ -6,7 +8,8 @@ namespace FMRun
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Page page = new Page("D:\\0");
+            page.Print(0);
         }
     }
 }
