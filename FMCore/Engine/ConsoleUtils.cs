@@ -8,6 +8,12 @@ namespace FMCore.Engine
 {
     public static class ConsoleUtils
     {
-        public static string 
+        public static void WriteColored(string text, ConsoleColor color)
+        {
+            var prevColor = Console.ForegroundColor;
+            Console.ForegroundColor = color;
+            Console.Write(text);
+            Console.ForegroundColor = prevColor;
+        }
     }
 }
