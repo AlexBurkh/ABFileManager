@@ -8,29 +8,29 @@ namespace FMCore.Models.UI.Borders
 {
     public class PropertiesBorder : Border
     {
-        static private readonly int propBorderHeight = 9;
-
-        int xStartPos = 0;
-        int yStartPos = Console.WindowHeight - propBorderHeight;
-
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();
             sb.Clear();
 
-            sb.Append(Border.LEFTCENTER);
-            for (int j = 0; j < (this.borderWidth - 2); j++)
+            sb.Append(LEFTCENTER);
+            for (int j = 1; j < (this.borderWidth - 1); j++)
             {
-                sb.Append(Border.HORIZONTAL);
+                sb.Append(HORIZONTAL);
             }
-            sb.Append(Border.RIGHTCENTER);
+            sb.Append(RIGHTCENTER);
             sb.Append('\n');
+            sb.Append('\n');
+            sb.AppendLine($"\tКороткое имя:              ");
+            sb.AppendLine($"\tДата создания:             ");
+            sb.AppendLine($"\tДата последнего изменения: ");
+            sb.AppendLine($"\tДата последнего доступа:   ");
 
             return sb.ToString();
         }
 
-        public PropertiesBorder(int width)
-            : base(PropertiesBorder.propBorderHeight, width)
+        public PropertiesBorder(int height, int width)
+            : base(height, width)
         { }
     }
 }

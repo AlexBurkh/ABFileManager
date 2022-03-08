@@ -28,29 +28,66 @@ namespace FMCore.Models.CatalogTree
                 }
             }
         }
-        public string Tree
+        public string LoadTree (string rootDir)
         {
-            get
-            {
-                BuildTree();
-                string result = _sb.ToString();
-                _sb.Clear();
-                return result;
-            }
+            CurrentDir = new DirectoryInfo(rootDir);
+            BuildTree();
+            string result = _sb.ToString();
+            _sb.Clear();
+            return result;
         }       // Особое свойства, возвращает текущий контент StringBuilder-а и очищает его
-
+        //private int depth { get; set; } = 2;
 
         /* МЕТОДЫ */
         /* Public */
         private void BuildTree(string prefix = "\t")
         {
-            DirectoryInfo di = CurrentDir;
-            List<FileSystemInfo> fsItems = di.GetFileSystemInfos()
+            List<DirectoryInfo> rootDirs = new List<DirectoryInfo>(CurrentDir.GetDirectories());
+            List<FileInfo> rootFiles = new List<FileInfo>(CurrentDir.GetFiles());
+
+            _sb.AppendLine($"{prefix}{CurrentDir.FullName}");
+
+            for (int i = 0; i < rootDirs.Count; i++)
+            {
+                try
+                {
+                    _sb.AppendLine($"{prefix}└── {rootDirs[i].FullName}");
+
+                    List<DirectoryInfo> childDirs = new List<DirectoryInfo>(rootDirs[i].GetDirectories());
+                    List<FileInfo> childFiles = new List<FileInfo>(rootDirs[i].GetFiles());
+
+                    for (int j = 0; j < childDirs.Count; j++)
+                    {
+                        _sb.AppendLine($"{prefix}{prefix}└── {childDirs[j].FullName}");
+                    }
+
+                    for (int k = 0; k < childFiles.Count; k++)
+                    {
+                        _sb.AppendLine($"{prefix}{prefix}└── {childFiles[k].FullName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            for (int i = 0; i < rootFiles.Count; i++)
+            {
+                _sb.AppendLine($"{prefix}└── {rootFiles[i].FullName}");
+            }
+/*            int depth = 2;
+            if (depth <= 0)
+            {
+                return;
+            }
+            depth -= 1;
+            try
+            {
+                DirectoryInfo di = CurrentDir;
+                List<FileSystemInfo> fsItems = di.GetFileSystemInfos()
                 .OrderBy(f => f.Name)
                 .ToList();
 
-            try
-            {
                 for (int i = 0; i < fsItems.Count; i++)
                 {
                     FileSystemInfo fsItem = fsItems[i];
@@ -81,6 +118,7 @@ namespace FMCore.Models.CatalogTree
                 Console.Error.WriteLine(ex.Message);
                 Console.ResetColor();
             }
+            depth++;*/
         }           // Составляет дерево относительно свойства CurrentDir - поля _currentDir
         /* Pricate */
         private bool IsDirectory(FileSystemInfo fsItem)

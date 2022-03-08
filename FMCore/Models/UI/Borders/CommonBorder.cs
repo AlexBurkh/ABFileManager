@@ -8,20 +8,16 @@ namespace FMCore.Models.UI.Borders
 {
     public class CommonBorder : Border
     {
-        public int xStartPos { get; } = 0;
-        public int yStartPos { get; } = 0;
-
-
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();
             sb.Clear();
-            for (int i = 0; i < (this.borderHeight - 2); i++)
+            for (int i = 0; i < this.borderHeight; i++)
             {
                 if (i == 0)
                 {
                     sb.Append(LEFTTOP);
-                    for (int j = 0; j < (this.borderWidth - 2); j++)
+                    for (int j = 1; j < (this.borderWidth - 1); j++)
                     {
                         sb.Append(HORIZONTAL);
                     }
@@ -29,10 +25,10 @@ namespace FMCore.Models.UI.Borders
                     sb.Append('\n');
                 }
 
-                if ((i > 0) && (i < (this.borderHeight - 1)))
+                if ((i > 0) && (i < (this.borderHeight - 2)))
                 {
                     sb.Append(VERTICAL);
-                    for (int j = 0; j < (this.borderWidth - 2); j++)
+                    for (int j = 1; j < (this.borderWidth - 1); j++)
                     {
                         sb.Append(' ');
                     }
@@ -40,10 +36,10 @@ namespace FMCore.Models.UI.Borders
                     sb.Append('\n');
                 }
 
-                if (i == (this.borderHeight - 3))
+                if (i == (this.borderHeight - 1))
                 {
                     sb.Append(LEFTBOTTOM);
-                    for (int j = 0; j < (this.borderWidth - 2); j++)
+                    for (int j = 1; j < (this.borderWidth - 1); j++)
                     {
                         sb.Append(HORIZONTAL);
                     }
