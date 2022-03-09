@@ -14,7 +14,7 @@ namespace FMRun
         static void Main(string[] args)
         {
             Page page = new Page(startCatalog);
-            page.Print(0);
+            page.Print(31);
 
             while (true)
             {
@@ -30,7 +30,7 @@ namespace FMRun
                         }
                         break;
                     case ConsoleKey.DownArrow:
-                        if (currentIndex < page.maxIndex)
+                        if (currentIndex < page.MaxIndex)
                         {
                             currentIndex += 1;
                             page.Print(currentIndex);

@@ -15,25 +15,34 @@ namespace FMCore.Models.UI.Pages
     public class Page
     {
         /* ПОЛЯ */
+        private int _currentIndex;
         private string _currentDir;
+        private List<string> _currentCuttedPageContent;
         /* Статические неизменяемые */
         static readonly ConsoleColor background = ConsoleColor.Blue;    // Фоновый цвет консоли
-        static readonly int textHeight = 30;                            // Количество строк, выделенных под отрисовку контента страницы
+        static readonly int TextHeight = 30;                            // Количество строк, выделенных под отрисовку контента страницы
         static readonly int porpertiesHeight = 9;                       // количество строк (вместе с границей) для окна свойств
         static readonly int pageHeight = 40;                            // Количество строк, выделенных под отрисовку окна в целом
         static readonly int pageWidth = 120;                             // Количество столбцов, выделенных под отрисовку окна в целом
 
 
         /* СВОЙСТВА */
-        // Устанавливаются в конструкторе
         CommonBorder CommonBorder { get; set; }
         PropertiesBorder PropertiesBorder { get; set; }
-        /* Постоянные на время вызова функции */
         FileSystemTree FsTree { get; set; }                             // Дерево ФС
         List<string> PageContent { get; set; }                          // Контент страницы (строки дерева, которые подлежат размещению на странице)
-        public int maxIndex { get; private set; }                       // Максимально возможный индекс на странице
-        /* Оперативные (могут изменяться втечении выполенния функции) */
-        private int CurrentIndex { get; set; }                          // Текущий индекс (выбираемый стрелками элемент)
+        public int MaxIndex { get; private set; }                       // Максимально возможный индекс на странице
+        private int CurrentIndex
+        {
+            get
+            {
+                return _currentIndex;
+            }
+            set
+            {
+                _currentIndex = (value >= 0) ? value : 0;
+            }
+        }                                     // Текущий индекс элемента (выбирается стрелками и управляется вне сборки)
         public string CurrentDir
         {
             get { return _currentDir; }
@@ -44,11 +53,22 @@ namespace FMCore.Models.UI.Pages
                     this._currentDir = value;
                     this.FsTree = new FileSystemTree(this.CurrentDir);
                     this.PageContent = new List<string>(FsTree.LoadTree(value).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
-                    this.maxIndex = PageContent.Count - 1;
+                    this.MaxIndex = PageContent.Count - 1;
                 }
             }
-        }                                      // Если используется сеттер , то еще и заново выстариваются дерево и контент страницы
-        private string[] CurrentCuttedPageContent;
+        }                                     // Если используется сеттер , то еще и заново выстариваются дерево и контент страницы
+        private List<string> CurrentCuttedPageContent
+        {
+            get
+            {
+                return _currentCuttedPageContent;
+            }
+            set
+            {
+                _currentCuttedPageContent = value;
+            }
+        }                // Текущий обрезанный по рамкам окна контент
+        
         /* Координаты точек окна консоли */
         // Точки для рисования границ
         (int x, int y) topBorderCoordinates = (0, 0);
@@ -83,22 +103,22 @@ namespace FMCore.Models.UI.Pages
             ConsoleUtils.WriteColoredAt(PropertiesBorder.Draw(), (propBorderCoordinates.x, propBorderCoordinates.y), Page.background); // Отрисовка границы окна свойств
 
             /* Отрисовка контента страницы */
-            PrintPageContent(topContentCoordinates, propContentCoordinates, background);
+            PrintPageContent();
         }
         public string GetSelectedElement()
         {
-            string[] cuttedPageContent = (PageContent.Count > Page.textHeight) ? new string[Page.textHeight] : new string[PageContent.Count];   // Массив для текущих отображаемых элементов string[30] индексы от 0 до 29
+            string[] cuttedPageContent = (PageContent.Count > Page.TextHeight) ? new string[Page.TextHeight] : new string[PageContent.Count];   // Массив для текущих отображаемых элементов string[30] индексы от 0 до 29
 
             // Высчитываем строки, которые нужно показать
-            if (this.CurrentIndex < textHeight)                                                                              // && (PageContent.Count >= (textHeight - 1)))
+            if (this.CurrentIndex < TextHeight)                                                                              // && (PageContent.Count >= (textHeight - 1)))
             {
-                if (PageContent.Count < Page.textHeight)
+                if (PageContent.Count < Page.TextHeight)
                 {
                     cuttedPageContent = PageContent.GetRange(0, PageContent.Count).ToArray();
                 }
                 else
                 {
-                    cuttedPageContent = PageContent.GetRange(0, textHeight).ToArray();
+                    cuttedPageContent = PageContent.GetRange(0, TextHeight).ToArray();
                 }
 
                 for (int i = 0; i < cuttedPageContent.Length; i++)
@@ -111,7 +131,7 @@ namespace FMCore.Models.UI.Pages
             }
             else
             {
-                cuttedPageContent = PageContent.GetRange(((this.CurrentIndex + 1) - textHeight), textHeight).ToArray();
+                cuttedPageContent = PageContent.GetRange(((this.CurrentIndex + 1) - TextHeight), TextHeight).ToArray();
                 return GetFullNameFromContentString(cuttedPageContent.Last());
                 /*for (int i = 0; i < cuttedPageContent.Length; i++)
                 {
@@ -125,46 +145,52 @@ namespace FMCore.Models.UI.Pages
         }
 
         /* Private */
-        private void PrintPageContent((int xTop, int yTop) topCoordinates, (int xProp, int yProp) propCoordinates, ConsoleColor background)
+        private void PrintPageContent()
         {
-            // Массив текущих строк контента страницы
-            this.CurrentCuttedPageContent = (PageContent.Count > Page.textHeight) ? new string[Page.textHeight] : new string[PageContent.Count];
+            int selectedItemIndex = -1;
 
-            // Высчитываем строки, которые нужно показать
-            if (this.CurrentIndex < textHeight)                                                                      
+            if (CurrentCuttedPageContent == null)
             {
-                if (PageContent.Count < Page.textHeight)
+                if (PageContent.Count > TextHeight)
                 {
-                    this.CurrentCuttedPageContent = PageContent.GetRange(0, PageContent.Count).ToArray();
+                    CurrentCuttedPageContent = PageContent.GetRange(0, TextHeight);
+                    PageContent.RemoveRange(0, TextHeight);
                 }
                 else
                 {
-                    this.CurrentCuttedPageContent = PageContent.GetRange(0, textHeight).ToArray();
-                }
-
-                for (int i = 0; i < this.CurrentCuttedPageContent.Length; i++)
-                {
-                    ConsoleColor foreground = (i == this.CurrentIndex) ? ConsoleColor.DarkRed : ColorFilesAndDirs(GetFullNameFromContentString(this.CurrentCuttedPageContent[i]));
-                    ConsoleUtils.WriteColoredAt(this.CurrentCuttedPageContent[i], (topCoordinates.xTop, topCoordinates.yTop + i), background, foreground);
-                }
-                if (this.CurrentCuttedPageContent.Length > 0)
-                {
-                    PrintFSItemProperty(GetFullNameFromContentString(this.CurrentCuttedPageContent[this.CurrentIndex]), propCoordinates, background);
+                    PageContent.GetRange(0, PageContent.Count);
+                    PageContent.RemoveRange(0, PageContent.Count);
                 }
             }
-            // Если нужно изменять выборку строк (при выхода за пределы окна щелчками "вниз")
+            
+            for (int i = 0; i < CurrentCuttedPageContent.Count; i++)
+            {
+                if (CurrentCuttedPageContent[i] == PageContent[CurrentIndex])
+                {
+                    selectedItemIndex = i;
+                    break;
+                }
+            }
+
+            if (selectedItemIndex == -1)
+            {
+                CurrentCuttedPageContent.RemoveAt(0);
+                CurrentCuttedPageContent.Add(PageContent[0]);
+                PageContent.RemoveAt(0);
+                PrintPageContent();
+            }
             else
             {
-                this.CurrentCuttedPageContent = PageContent.GetRange(((this.CurrentIndex + 1) - textHeight), textHeight).ToArray();
-                for (int i = 0; i < this.CurrentCuttedPageContent.Length; i++)
+                for (int i = 0; i < this.CurrentCuttedPageContent.Count; i++)
                 {
-                    ConsoleColor foreground = (i == (this.CurrentCuttedPageContent.Length - 1)) ? ConsoleColor.DarkRed : ColorFilesAndDirs(GetFullNameFromContentString(this.CurrentCuttedPageContent[i]));
-                    ConsoleUtils.WriteColoredAt(this.CurrentCuttedPageContent[i], (topCoordinates.xTop, topCoordinates.yTop + i), background, foreground);
+                    ConsoleColor foreground = (i == selectedItemIndex) ? ConsoleColor.DarkRed : ColorFilesAndDirs(GetFullNameFromContentString(this.CurrentCuttedPageContent[i]));
+                    ConsoleUtils.WriteColoredAt(this.CurrentCuttedPageContent[i], (topContentCoordinates.x, topContentCoordinates.y + i), background, foreground);
                 }
-                if (this.CurrentCuttedPageContent.Length > 0)
+                if (this.CurrentCuttedPageContent.Count > 0)
                 {
-                    PrintFSItemProperty(GetFullNameFromContentString(this.CurrentCuttedPageContent[this.CurrentCuttedPageContent.Length - 1]), propCoordinates, background);
+                    PrintFSItemProperty(GetFullNameFromContentString(this.CurrentCuttedPageContent[selectedItemIndex]), propContentCoordinates, background);
                 }
+
             }
         }
         private void PrintFSItemProperty(string fullFSItemName, (int xPos, int yPos) propCoordinates, ConsoleColor backgound)
@@ -193,6 +219,10 @@ namespace FMCore.Models.UI.Pages
             {
                 return ConsoleColor.Black;
             }
+        }
+        private int ComputeLocalIndex()
+        {
+            return (CurrentIndex < TextHeight) ? CurrentIndex : CurrentIndex - TextHeight * (int)(Math.Floor(Convert.ToDouble(CurrentIndex)) / Convert.ToDouble(TextHeight));
         }
 
 
