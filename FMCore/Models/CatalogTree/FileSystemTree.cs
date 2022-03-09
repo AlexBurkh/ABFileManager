@@ -36,10 +36,11 @@ namespace FMCore.Models.CatalogTree
             _sb.Clear();
             return result;
         }       // Особое свойства, возвращает текущий контент StringBuilder-а и очищает его
-        //private int depth { get; set; } = 2;
+                //private int depth { get; set; } = 2;
 
         /* МЕТОДЫ */
         /* Public */
+        /* Private */
         private void BuildTree(string prefix = "\t")
         {
             List<DirectoryInfo> rootDirs = new List<DirectoryInfo>(CurrentDir.GetDirectories());
@@ -75,56 +76,8 @@ namespace FMCore.Models.CatalogTree
             {
                 _sb.AppendLine($"{prefix}└── {rootFiles[i].FullName}");
             }
-/*            int depth = 2;
-            if (depth <= 0)
-            {
-                return;
-            }
-            depth -= 1;
-            try
-            {
-                DirectoryInfo di = CurrentDir;
-                List<FileSystemInfo> fsItems = di.GetFileSystemInfos()
-                .OrderBy(f => f.Name)
-                .ToList();
-
-                for (int i = 0; i < fsItems.Count; i++)
-                {
-                    FileSystemInfo fsItem = fsItems[i];
-
-                    if (i == fsItems.Count - 1)
-                    {
-                        _sb.AppendLine($"{prefix}└── {fsItem}");
-                        if (IsDirectory(fsItem))
-                        {
-                            CurrentDir = (DirectoryInfo)fsItem;
-                            BuildTree(prefix + '\t');
-                        }
-                    }
-                    else
-                    {
-                        _sb.AppendLine($"{prefix}├── {fsItem}");
-                        if (IsDirectory(fsItem))
-                        {
-                            CurrentDir = (DirectoryInfo) fsItem;
-                            BuildTree(prefix + "│   ");
-                        }
-                    }
-                }
-            }
-            catch(Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.Error.WriteLine(ex.Message);
-                Console.ResetColor();
-            }
-            depth++;*/
+         
         }           // Составляет дерево относительно свойства CurrentDir - поля _currentDir
-        /* Pricate */
-        private bool IsDirectory(FileSystemInfo fsItem)
-        {
-            return (fsItem.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
-        }
 
 
         /* КОНСТРУКТОРЫ */

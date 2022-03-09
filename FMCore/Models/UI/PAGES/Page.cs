@@ -85,7 +85,7 @@ namespace FMCore.Models.UI.Pages
             /* Отрисовка контента страницы */
             PrintPageContent(topContentCoordinates, propContentCoordinates, background);
         }
-        public string GetSelectedElement()
+        public string GetSelectedItem()
         {
             string[] cuttedPageContent = (PageContent.Count > Page.textHeight) ? new string[Page.textHeight] : new string[PageContent.Count];   // Массив для текущих отображаемых элементов string[30] индексы от 0 до 29
 
@@ -122,6 +122,11 @@ namespace FMCore.Models.UI.Pages
                 }*/
             }
             return string.Empty;
+        }
+        public bool IsDirectory(string fileName)
+        {
+            FileSystemInfo fsItem = (Directory.Exists(fileName)) ? new DirectoryInfo(fileName) : new FileInfo(fileName);
+            return (fsItem.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
         }
 
         /* Private */

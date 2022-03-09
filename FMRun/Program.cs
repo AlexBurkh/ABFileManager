@@ -2,6 +2,8 @@
 using FMCore.Models.UI.Pages;
 using FMCore.Models.CatalogTree;
 using System.IO;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace FMRun
 {
@@ -10,6 +12,8 @@ namespace FMRun
         static int prevIndex = 0;
         static int currentIndex = 0;
         static string startCatalog = "D:\\";
+        static string fileCopyBuffer = string.Empty;
+        static List<string> directoryCopyBuffer = new List<string>();
 
         static void Main(string[] args)
         {
@@ -28,33 +32,69 @@ namespace FMRun
                             currentIndex -= 1;
                             page.Print(currentIndex);
                         }
-                        break;
+                        continue;
                     case ConsoleKey.DownArrow:
                         if (currentIndex < page.maxIndex)
                         {
                             currentIndex += 1;
                             page.Print(currentIndex);
                         }
-                        break;
+                        continue;
                     case ConsoleKey.LeftArrow:
                         var parentDir = new DirectoryInfo(page.CurrentDir).Parent;
                         if (parentDir != null)
                         {
-                            //currentIndex = prevIndex;
                             currentIndex = 0;
                             page.Print(currentIndex, parentDir.FullName);
                         }
                         continue;
                     case ConsoleKey.RightArrow:
-                        var selectedItem = page.GetSelectedElement();
-                        if (Directory.Exists(selectedItem))
                         {
-                            var currentDir = new DirectoryInfo(selectedItem);
-                            //prevIndex = currentIndex;
-                            currentIndex = 0;
-                            page.Print(currentIndex, currentDir.FullName);
+                            var selectedItem = page.GetSelectedItem();
+                            if (Directory.Exists(selectedItem))
+                            {
+                                var currentDir = new DirectoryInfo(selectedItem);
+                                currentIndex = 0;
+                                page.Print(currentIndex, currentDir.FullName);
+                            }
                         }
                         continue;
+                    case ConsoleKey.Enter:
+                        {
+                            var selectedItem = page.GetSelectedItem();
+                            if (File.Exists(selectedItem))
+                            {
+                                Process.Start(new ProcessStartInfo() { FileName = selectedItem, UseShellExecute = true} );
+                                page.Print(currentIndex);
+                            } 
+                        }
+                        continue;
+                    case ConsoleKey.F1:
+                        {
+                            var selectedItem = page.GetSelectedItem();
+                            if (page.IsDirectory(selectedItem))
+                            {
+                                
+                            }
+                            else
+                            {
+                                fileCopyBuffer = selectedItem;
+                            }
+                        }
+                        continue;
+
+                }
+                break;
+            }
+        }
+
+        static void CopyDirectory(string dirPath)
+        {
+            try
+            {
+                if (Directory.Exists(dirPath))
+                {
+
                 }
             }
         }
