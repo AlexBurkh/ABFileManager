@@ -35,7 +35,9 @@ namespace FMCore.Models.CatalogTree
         {
             CurrentDir = new DirectoryInfo(workDir);
             BuildTree();
-            return _sb.ToString();
+            string result = _sb.ToString();
+            _sb.Clear();
+            return result;
         }       // Особое свойства, возвращает текущий контент StringBuilder-а и очищает его
         /* Private */
         private void BuildTree(string prefix = "\t")
@@ -49,24 +51,49 @@ namespace FMCore.Models.CatalogTree
             {
                 try
                 {
-                    _sb.AppendLine($"{prefix}└── {rootDirs[i].FullName}");
+                    if (rootDirs[i] == rootDirs.Last())
+                    {
+                        _sb.AppendLine($"{prefix}└── {rootDirs[i].FullName}");
+                    }
+                    else
+                    {
+                        _sb.AppendLine($"{prefix}\u251c── {rootDirs[i].FullName}");
+                    }
+                    //_sb.AppendLine($"{prefix}└── {rootDirs[i].FullName}");
 
                     List<DirectoryInfo> childDirs = new List<DirectoryInfo>(rootDirs[i].GetDirectories());
                     List<FileInfo> childFiles = new List<FileInfo>(rootDirs[i].GetFiles());
 
                     for (int j = 0; j < childDirs.Count; j++)
                     {
-                        _sb.AppendLine($"{prefix}{prefix}└── {childDirs[j].FullName}");
+                        if (childDirs[j] == childDirs.Last())
+                        {
+                            _sb.AppendLine($"{prefix}\u2502{prefix}└── {childDirs[j].FullName}");
+                        }
+                        else
+                        {
+                            _sb.AppendLine($"{prefix}\u2502{prefix}\u251c── {childDirs[j].FullName}");
+                        }
+                        //_sb.AppendLine($"{prefix}\u2502{prefix}└── {childDirs[j].FullName}");
                     }
 
                     for (int k = 0; k < childFiles.Count; k++)
                     {
-                        _sb.AppendLine($"{prefix}{prefix}└── {childFiles[k].FullName}");
+                        if (childFiles[k] == childFiles.Last())
+                        {
+                            _sb.AppendLine($"{prefix}\u2502{prefix}└── {childFiles[k].FullName}");
+                        }
+                        else
+                        {
+                            _sb.AppendLine($"{prefix}\u2502{prefix}\u251c── {childFiles[k].FullName}");
+                        }
+                        //_sb.AppendLine($"{prefix}\u2502{prefix}└── {childFiles[k].FullName}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    //Console.WriteLine(ex.Message);
+                    Console.WriteLine();
                 }
             }
             for (int i = 0; i < rootFiles.Count; i++)
