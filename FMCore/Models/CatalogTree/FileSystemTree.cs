@@ -12,7 +12,6 @@ namespace FMCore.Models.CatalogTree
         private StringBuilder _sb;     // StringBuilder для промежуточного хранения дерева каталогов (очищается перед возвратом контента)
         private DirectoryInfo _currentDir;      // Текущий корневой каталог для постройки дерева
 
-
         /* СВОЙСТВА */
         private DirectoryInfo CurrentDir
         {
@@ -28,18 +27,16 @@ namespace FMCore.Models.CatalogTree
                 }
             }
         }
-        public string LoadTree (string rootDir)
-        {
-            CurrentDir = new DirectoryInfo(rootDir);
-            BuildTree();
-            string result = _sb.ToString();
-            _sb.Clear();
-            return result;
-        }       // Особое свойства, возвращает текущий контент StringBuilder-а и очищает его
-                //private int depth { get; set; } = 2;
+
 
         /* МЕТОДЫ */
         /* Public */
+        public string LoadTree(string workDir)
+        {
+            CurrentDir = new DirectoryInfo(workDir);
+            BuildTree();
+            return _sb.ToString();
+        }       // Особое свойства, возвращает текущий контент StringBuilder-а и очищает его
         /* Private */
         private void BuildTree(string prefix = "\t")
         {
@@ -81,10 +78,9 @@ namespace FMCore.Models.CatalogTree
 
 
         /* КОНСТРУКТОРЫ */
-        public FileSystemTree(string rootCatalog)
+        public FileSystemTree()
         {
             _sb = new StringBuilder();
-            CurrentDir = new DirectoryInfo(rootCatalog);
         }
     }
 }

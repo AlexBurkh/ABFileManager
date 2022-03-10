@@ -82,7 +82,6 @@ namespace FMRun
                             }
                         }
                         continue;
-
                 }
                 break;
             }
@@ -96,6 +95,10 @@ namespace FMRun
                 {
 
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
     }

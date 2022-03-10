@@ -28,6 +28,10 @@ namespace FMCore.Models.UI.Pages
         // Устанавливаются в конструкторе
         CommonBorder CommonBorder { get; set; }
         PropertiesBorder PropertiesBorder { get; set; }
+        public static int TextHeight
+        {
+            get { return textHeight; }
+        }
         /* Постоянные на время вызова функции */
         FileSystemTree FsTree { get; set; }                             // Дерево ФС
         List<string> PageContent { get; set; }                          // Контент страницы (строки дерева, которые подлежат размещению на странице)
@@ -202,7 +206,7 @@ namespace FMCore.Models.UI.Pages
 
 
         /* КОНСТРУКТОРЫ */
-        public Page(string dir)
+        public Page()
         {
             CurrentDir = dir;
             this.CommonBorder = new CommonBorder(Page.pageHeight, Page.pageWidth);
