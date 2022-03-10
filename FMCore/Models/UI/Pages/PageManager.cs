@@ -22,6 +22,8 @@ namespace FMCore.Models.UI.Pages
         private int             _previousSelectedItemIndex = 0;
         private int             _currentPageContentStartIndex = 0;
 
+        private string          _status = string.Empty;
+
         /* СВОЙСТВА */
         public int      MaxIndex        { get { return _maxIndex; } }
         public string   CurrentWorkDir  { get { return _currentWorkDir; } } 
@@ -32,6 +34,11 @@ namespace FMCore.Models.UI.Pages
                 return _currentPage.GetFullNameFromContentString(_currentPage.GetSelectedItem()); 
             } 
         }
+        public string   Status
+        {
+            get { return _status; }
+            set { _status = value; }
+        }
 
 
         public void MakePage(int selectedItemIndex, string workDir)
@@ -39,23 +46,26 @@ namespace FMCore.Models.UI.Pages
             _selectedItemIndex = selectedItemIndex;
             _currentWorkDir = workDir;
 
-            _treeContent = new List<string>(
-                                    _tree.LoadTree(workDir)
-                                    .Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries)
-                                    );
-/*            _currentPage.PageContent = (_treeContent.Count > Page.TextHeight) ?
-                                            _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight) :
-                                            _treeContent.GetRange(_currentPageContentStartIndex, _treeContent.Count);*/
-            _currentPage.PageContent = (_treeContent.Count > Page.TextHeight) ? 
-                                            _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight) : 
-                                            _treeContent.GetRange(0, _treeContent.Count);
+            _treeContent = new List<string>(_tree.LoadTree(workDir).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+
+            if (_currentPageContentStartIndex > (_treeContent.Count - Page.TextHeight))
+            {
+                _currentPageContentStartIndex = 0;
+                _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, (_treeContent.Count < Page.TextHeight) ? _treeContent.Count : Page.TextHeight);
+            }
+            else
+            {
+                _currentPage.PageContent = (_treeContent.Count > Page.TextHeight) ? _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight) : _treeContent.GetRange(0, _treeContent.Count);
+            }
 
             _maxIndex = _treeContent.Count - 1;
 
             if (_selectedItemIndex >= _treeContent.Count)
             {
-                this.MakePage(0, new DirectoryInfo(workDir).Parent.FullName);
+                _currentPageContentStartIndex = 0;
+                this.MakePage(_currentPageContentStartIndex, new DirectoryInfo(workDir).Parent.FullName);
             }
+
             (bool isOnPage, int itemIndex) = _currentPage.IsOnPage(_treeContent[_selectedItemIndex]);
             if (isOnPage)
             {
@@ -67,6 +77,7 @@ namespace FMCore.Models.UI.Pages
                 if (_selectedItemIndex > _previousSelectedItemIndex)
                 {
                     index = Page.TextHeight - 1;
+
                     _currentPageContentStartIndex += 1;
                 }
                 else

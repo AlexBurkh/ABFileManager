@@ -37,7 +37,10 @@ namespace FMCore.Models.UI.Pages
 
         // Точки для отрисовки контента страницы
         (int x, int y)                          _topContentCoord            =    (2, 1);
-        (int x, int y)                          _propContentCoord           =    (36, _pageHeight - _porpertiesHeight + 2);
+        (int x, int y)                          _propContentCoord           =    (36, _pageHeight - _porpertiesHeight + 2); // 33
+
+        // Точки для отрисовки статус-бара
+        (int x, int y)                          _statusBarCoord             =    (2, 39);
 
 
         /* СВОЙСТВА */
@@ -120,6 +123,7 @@ namespace FMCore.Models.UI.Pages
             {
                 ConsoleUtils.WriteColoredAt(propertyStrings[i], (_propContentCoord.x, _propContentCoord.y + i), _background);
             }
+            Console.SetCursorPosition(_statusBarCoord.x, _statusBarCoord.y);
         }
         internal string         GetFullNameFromContentString(string contentString)
         {

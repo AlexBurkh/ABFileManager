@@ -48,7 +48,7 @@ namespace FMRun
                         if (parentDir != null)
                         {
                             currCatalog = parentDir.FullName;
-                            currentIndex = prevIndex;
+                            currentIndex = 0;
                             pageManager.MakePage(currentIndex, currCatalog);
                         }
                         continue;
@@ -59,7 +59,6 @@ namespace FMRun
                             {
                                 prevCatalog = currCatalog;
                                 currCatalog = selectedItem;
-                                prevIndex = currentIndex;
                                 currentIndex = 0;
                                 pageManager.MakePage(currentIndex, currCatalog);
                             }
