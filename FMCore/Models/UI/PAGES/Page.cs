@@ -63,7 +63,7 @@ namespace FMCore.Models.UI.Pages
             return (fsItem.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
         }
         /* Public */
-        public void          Print(int currIndex)
+        public void          Print(int currIndex, string status)
         {
             _currentIndex = currIndex;
             _selectedItem = _pageContent[_currentIndex];
@@ -79,6 +79,13 @@ namespace FMCore.Models.UI.Pages
             /* Отрисовка границ */
             ConsoleUtils.WriteColoredAt(_commonBorder.Draw(), _topBorderCoor, Page._background);       // Отрисовка внешней границы
             ConsoleUtils.WriteColoredAt(_propertiesBorder.Draw(), _propBorderCoord, Page._background); // Отрисовка границы окна свойств
+
+            if ( ! string.IsNullOrWhiteSpace(status))
+            {
+
+                ConsoleUtils.WriteColoredAt("                                                                                ", _statusBarCoord, _background);
+                ConsoleUtils.WriteColoredAt(status + '\r', _statusBarCoord, _background);
+            }
 
             /* Отрисовка контента страницы */
             PrintPageContent();

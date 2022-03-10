@@ -84,6 +84,8 @@ namespace FMRun
                             else
                             {
                                 fileToCopy = (new FileInfo(selectedItem).Name, File.ReadAllBytes(selectedItem));
+                                pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} скопирован в оперативную память";
+                                pageManager.MakePage(currentIndex, currCatalog);
                             }
                         }
                         continue;
@@ -93,6 +95,7 @@ namespace FMRun
                             if (Directory.Exists(selectedItem))
                             {
                                 File.WriteAllBytes($"{currCatalog}\\{fileToCopy.name}", fileToCopy.buffer);
+                                pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} вставлен в каталог {currCatalog}\\";
                             }
                             pageManager.MakePage(currentIndex, currCatalog);
                         }

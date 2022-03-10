@@ -69,7 +69,7 @@ namespace FMCore.Models.UI.Pages
             (bool isOnPage, int itemIndex) = _currentPage.IsOnPage(_treeContent[_selectedItemIndex]);
             if (isOnPage)
             {
-                _currentPage.Print(itemIndex);
+                _currentPage.Print(itemIndex, _status);
             }
             else
             {
@@ -86,7 +86,7 @@ namespace FMCore.Models.UI.Pages
                     index = 0;
                 }
                 _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight);
-                _currentPage.Print(index);
+                _currentPage.Print(index, _status);
             }
             _previousSelectedItemIndex = _selectedItemIndex;
         }
