@@ -66,14 +66,7 @@ namespace FMCore.Models.UI.Pages
         /* Public */
         public void Print(int currIndex, string currentDirPath = "")
         {
-            this.CurrentIndex = currIndex;
             Console.BackgroundColor = Page.background;
-
-            // Определение текущего каталога и установка значения свойств: currentDir и pageContent
-            if (!string.IsNullOrWhiteSpace(currentDirPath))
-            {
-                this.CurrentDir = currentDirPath;
-            }
 
             // Ограничиваем размеры окна
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -83,8 +76,8 @@ namespace FMCore.Models.UI.Pages
             }
 
             /* Отрисовка границ */
-            ConsoleUtils.WriteColoredAt(CommonBorder.Draw(), (topBorderCoordinates.x, topBorderCoordinates.y), Page.background);       // Отрисовка внешней границы
-            ConsoleUtils.WriteColoredAt(PropertiesBorder.Draw(), (propBorderCoordinates.x, propBorderCoordinates.y), Page.background); // Отрисовка границы окна свойств
+            ConsoleUtils.WriteColoredAt(CommonBorder.Draw(), topBorderCoordinates, Page.background);       // Отрисовка внешней границы
+            ConsoleUtils.WriteColoredAt(PropertiesBorder.Draw(), propBorderCoordinates, Page.background); // Отрисовка границы окна свойств
 
             /* Отрисовка контента страницы */
             PrintPageContent(topContentCoordinates, propContentCoordinates, background);
@@ -206,9 +199,8 @@ namespace FMCore.Models.UI.Pages
 
 
         /* КОНСТРУКТОРЫ */
-        public Page()
+        public Page(List<string> pageContent)
         {
-            CurrentDir = dir;
             this.CommonBorder = new CommonBorder(Page.pageHeight, Page.pageWidth);
             this.PropertiesBorder = new PropertiesBorder(Page.porpertiesHeight , Page.pageWidth);
         }
