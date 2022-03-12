@@ -1,6 +1,7 @@
 ﻿using System;
 using FMCore.Models.UI.Pages;
 using FMCore.Models.CatalogTree;
+using System.Linq;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -12,9 +13,8 @@ namespace FMRun
         static int prevIndex = 0;
         static int currentIndex = 0;
         static string startCatalog = "D:\\";
-        static string prevCatalog = string.Empty;
         static string currCatalog = string.Empty;
-        static (string name, byte[] buffer) fileToCopy;
+        static string sourceFileToCopy;
         static List<string> directoryCopyBuffer = new List<string>();
 
         static void Main(string[] args)
@@ -57,7 +57,6 @@ namespace FMRun
                             string selectedItem = pageManager.SelectedItem;
                             if (Directory.Exists(selectedItem))
                             {
-                                prevCatalog = currCatalog;
                                 currCatalog = selectedItem;
                                 currentIndex = 0;
                                 pageManager.MakePage(currentIndex, currCatalog);
@@ -79,23 +78,59 @@ namespace FMRun
                             var selectedItem = pageManager.SelectedItem;
                             if (Directory.Exists(selectedItem))
                             {
-
+                                CopyDirectory(selectedItem);
                             }
                             else
                             {
-                                fileToCopy = (new FileInfo(selectedItem).Name, File.ReadAllBytes(selectedItem));
-                                pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} скопирован в оперативную память";
+                                sourceFileToCopy = selectedItem;
+                                pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} выбран для копирования";
                                 pageManager.MakePage(currentIndex, currCatalog);
                             }
                         }
                         continue;
+
+
+                    // В копировании папки есть ошибка. Скопированное содержимое каталога вставляетсся не в него, а рядом с ним.
                     case ConsoleKey.F2:
                         {
                             var selectedItem = pageManager.SelectedItem;
                             if (Directory.Exists(selectedItem))
                             {
-                                File.WriteAllBytes($"{currCatalog}\\{fileToCopy.name}", fileToCopy.buffer);
-                                pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} вставлен в каталог {currCatalog}\\";
+                                if (! string.IsNullOrWhiteSpace(sourceFileToCopy))
+                                {
+                                    try
+                                    {
+                                        File.Copy(sourceFileToCopy, selectedItem);
+                                        sourceFileToCopy = string.Empty;
+                                        pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} скопирован в каталог {currCatalog}\\";
+                                    }
+                                    catch
+                                    {
+
+                                    }
+                                    
+                                }
+                                else
+                                {
+                                    if (directoryCopyBuffer != null)
+                                    {
+                                        for (int i = 0; i < directoryCopyBuffer.Count; i++)
+                                        {
+                                            try
+                                            {
+                                                if (Directory.Exists(directoryCopyBuffer[i]))
+                                                {
+                                                    Directory.CreateDirectory($"{selectedItem}\\{new DirectoryInfo(directoryCopyBuffer[i]).Name}");
+                                                }
+                                                File.Copy(directoryCopyBuffer[i], $"{selectedItem}\\{new FileInfo(directoryCopyBuffer[i]).Name}");
+                                            }
+                                            catch
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             pageManager.MakePage(currentIndex, currCatalog);
                         }
@@ -111,7 +146,18 @@ namespace FMRun
             {
                 if (Directory.Exists(dirPath))
                 {
-
+                    DirectoryInfo root = new DirectoryInfo(dirPath);
+                    directoryCopyBuffer.Add(root.FullName);
+                    FileInfo[] files = root.GetFiles();
+                    for (int i = 0; i < files.Length; i++)
+                    {
+                        directoryCopyBuffer.Add(files[i].FullName);
+                    }
+                    DirectoryInfo[] dirs = root.GetDirectories();
+                    for(int i = 0; i < dirs.Length; i++)
+                    {
+                        CopyDirectory(dirs[i].FullName);
+                    }
                 }
             }
             catch (Exception ex)
