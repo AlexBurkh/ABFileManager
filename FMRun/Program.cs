@@ -277,16 +277,17 @@ namespace FMRun
             if (directoryCopyBuffer != null)
             {
                 string pathForSave = dirPath;
+                int oldRootDirLength = directoryCopyBuffer[0].Length - new DirectoryInfo(directoryCopyBuffer[0]).Name.Length;
                 for (int i = 0; i < directoryCopyBuffer.Count; i++)
                 {
                     try
                     {
                         if (Directory.Exists(directoryCopyBuffer[i]))
                         {
-                            pathForSave += $"\\{new DirectoryInfo(directoryCopyBuffer[i]).Name}";
+                            pathForSave = $"{dirPath}\\{new DirectoryInfo(directoryCopyBuffer[i]).FullName.Substring(oldRootDirLength)}";
                             Directory.CreateDirectory(pathForSave);
                         }
-                        File.Copy(directoryCopyBuffer[i], $"{pathForSave}\\{new FileInfo(directoryCopyBuffer[i]).Name}");
+                        File.Copy(directoryCopyBuffer[i], $"{dirPath}\\{new FileInfo(directoryCopyBuffer[i]).FullName.Substring(oldRootDirLength)}");
                         Log($"{directoryCopyBuffer[i]} скопирован");
                     }
                     catch (Exception ex)
