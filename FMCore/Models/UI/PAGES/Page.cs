@@ -36,10 +36,10 @@ namespace FMCore.Models.UI.Pages
 
         // Точки для отрисовки контента страницы
         (int x, int y)                          _topContentCoord            =    (2, 1);
-        (int x, int y)                          _propContentCoord           =    (36, _pageHeight - _porpertiesHeight + 2); // 33
+        (int x, int y)                          _propContentCoord           =    (17, _pageHeight - _porpertiesHeight + 2); // 33
 
         // Точки для отрисовки статус-бара
-        (int x, int y)                          _statusBarCoord             =    (2, 39);
+        (int x, int y)                          _statusBarCoord             =    (2, _textHeight + _porpertiesHeight);
 
 
         /* СВОЙСТВА */
@@ -130,16 +130,56 @@ namespace FMCore.Models.UI.Pages
         }
         private void            PrintFSItemProperty(string fullFSItemName)
         {
+            string[] propertyStrings;
             FileSystemInfo fsInfo = (Directory.Exists(fullFSItemName)) ? new DirectoryInfo(fullFSItemName) : new FileInfo(fullFSItemName);
-            string[] propertyStrings = new string[] { $"{fsInfo.Name}\n",
-                                                      $"{fsInfo.CreationTime}\n",
-                                                      $"{fsInfo.LastWriteTime}\n",
-                                                      $"{fsInfo.LastAccessTime}\n" };
+            if (Directory.Exists(fullFSItemName))
+            {
+                DirectoryInfo di = new DirectoryInfo(fullFSItemName);
+                propertyStrings = new string[]
+                {
+                    $"{di.Name}",
+                    $"{di.CreationTime}",
+                    $"{di.LastWriteTime}",
+                    $"{di.LastAccessTime}",
+                    $"{DirectorySize(di)} Б",
+                };
+            }
+            else
+            {
+                FileInfo fi = new FileInfo(fullFSItemName);
+                propertyStrings = new string[]
+                {
+                    $"{fi.Name}",
+                    $"{fi.CreationTime}",
+                    $"{fi.LastWriteTime}",
+                    $"{fi.LastAccessTime}",
+                    $"{fi.Length} Б",
+                };
+            }
+
             for (int i = 0; i < propertyStrings.Length; i++)
             {
                 ConsoleUtils.WriteColoredAt(propertyStrings[i], (_propContentCoord.x, _propContentCoord.y + i), _background);
             }
             Console.SetCursorPosition(_statusBarCoord.x, _statusBarCoord.y);
+        }
+        private long DirectorySize(DirectoryInfo di)
+        {
+            try
+            {
+                long folderSize = 0;
+                string[] files = Directory.GetFiles(di.FullName, "*", SearchOption.AllDirectories);
+                for (int i = 0; i < files.Length; i++)
+                {
+                    folderSize += new FileInfo(files[i]).Length;
+                }
+                return folderSize;
+            }
+            catch (Exception ex)
+            {
+                return -1;
+            }
+
         }
         private ConsoleColor    ColorFilesAndDirs(string path)
         {

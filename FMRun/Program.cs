@@ -175,7 +175,7 @@ namespace FMRun
                                             continue;
                                         }
                                         File.Delete(directoryCopyBuffer[i]);
-                                        Log($"{directoryCopyBuffer[i]} удален" + '\n');
+                                        Log($"{directoryCopyBuffer[i]} удален");
                                     }
                                     catch (Exception ex)
                                     {
@@ -193,7 +193,7 @@ namespace FMRun
                                     File.Delete(selectedItem);
                                     status = $"Файл {selectedItem} удален";
                                     pageManager.Status = status;
-                                    Log(status + '\n');
+                                    Log(status);
                                 }
                                 catch (Exception ex)
                                 {
@@ -218,6 +218,7 @@ namespace FMRun
                         continue;
                 }
                 SaveState();
+                Log("Приложение завершило работу по команде от пользователя. Текущее состояние сохранено в файле конфигурации");
                 break;
             }
         }
@@ -267,7 +268,7 @@ namespace FMRun
         {
             sourceFileToCopy = filePath;
             string status = $"Файл {new FileInfo(filePath).Name} выбран для копирования";
-            Log(status + '\n');
+            Log(status);
             return status;
         }
         
@@ -286,7 +287,7 @@ namespace FMRun
                             Directory.CreateDirectory(pathForSave);
                         }
                         File.Copy(directoryCopyBuffer[i], $"{pathForSave}\\{new FileInfo(directoryCopyBuffer[i]).Name}");
-                        Log($"{directoryCopyBuffer[i]} скопирован" + '\n');
+                        Log($"{directoryCopyBuffer[i]} скопирован");
                     }
                     catch (Exception ex)
                     {
@@ -304,7 +305,7 @@ namespace FMRun
             {
                 File.Copy(sourceFileToCopy, $"{filePath}\\{new FileInfo(sourceFileToCopy).Name}");
                 sourceFileToCopy = string.Empty;
-                Log($"{sourceFileToCopy} скопирован" + '\n');
+                Log($"{sourceFileToCopy} скопирован");
                 return $"Файл {new FileInfo(sourceFileToCopy).Name} скопирован в каталог {currentCatalog}\\";
             }
             catch (Exception ex)
@@ -324,13 +325,13 @@ namespace FMRun
             string exceptionsDir = errorsDir;
             string logFilePath = $"{logDir}INFO.txt";
 
-            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {logText}"); ;
+            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {logText}\n"); ;
         }
         static void Log(Exception ex)
         {
             string logFilePath = $"{errorsDir}{ex.GetType()}.error";
 
-            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}");
+            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}\n");
         }
         static void SaveState()
         {

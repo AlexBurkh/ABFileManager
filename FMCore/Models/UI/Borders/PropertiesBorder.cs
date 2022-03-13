@@ -21,11 +21,11 @@ namespace FMCore.Models.UI.Borders
             sb.Append(RIGHTCENTER);
             sb.Append('\n');
             sb.Append('\n');
-            sb.AppendLine($"\tКороткое имя:              ");
-            sb.AppendLine($"\tДата создания:             ");
-            sb.AppendLine($"\tДата последнего изменения: ");
-            sb.AppendLine($"\tДата последнего доступа:   ");
-
+            sb.AppendLine($"\tИмя:     ");
+            sb.AppendLine($"\tСоздан:  ");
+            sb.AppendLine($"\tИзменен: ");
+            sb.AppendLine($"\tОткрыт:  ");
+            sb.AppendLine($"\tРазмер:  ");
             return sb.ToString();
         }
 
