@@ -83,7 +83,11 @@ namespace FMCore.Models.UI.Pages
                 }
                 else
                 {
-                    _currentPageContentStartIndex -= 1;
+                    if (_currentPageContentStartIndex > 0)
+                    {
+                        _currentPageContentStartIndex -= 1;
+                    }
+                    
                     index = 0;
                 }
                 _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight);

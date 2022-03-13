@@ -19,6 +19,7 @@ namespace FMRun
         static readonly string errorsDir = $"{logDir}\\errors\\";
 
         static Config appConfig;
+        static int startIndex = 0;
         static int currentIndex = 0;
         static string currentCatalog = string.Empty;
 
@@ -35,14 +36,13 @@ namespace FMRun
             appConfig = ReadConfig(); 
             pageManager = new PageManager(appConfig);
             currentCatalog = appConfig.CurrentDir;
-            currentIndex = appConfig.CurrentIndex;
+            currentIndex = startIndex;
             Directory.CreateDirectory(logDir);
             Directory.CreateDirectory(errorsDir);
 
             pageManager.MakePage(currentIndex, currentCatalog);
             ProcessUserInput();
         }
-
 
         static Config ReadConfig()
         {
@@ -337,7 +337,6 @@ namespace FMRun
         static void SaveState()
         {
             appConfig.CurrentDir = currentCatalog;
-            appConfig.CurrentIndex = currentIndex;
             try
             {
                 string json = JsonSerializer.Serialize<Config>(appConfig);
