@@ -32,16 +32,23 @@ namespace FMRun
 
         static void Main(string[] args)
         {
-            
-            appConfig = ReadConfig(); 
-            pageManager = new PageManager(appConfig);
-            currentCatalog = appConfig.CurrentDir;
-            currentIndex = startIndex;
             Directory.CreateDirectory(logDir);
             Directory.CreateDirectory(errorsDir);
+            appConfig = ReadConfig();
+            if (appConfig is not null)
+            {
+                Log($"[{DateTime.Now}] Прочитан конфигурационный файл. Приложение запущено");
+                pageManager = new PageManager(appConfig);
+                currentCatalog = appConfig.CurrentDir;
+                currentIndex = startIndex;
 
-            pageManager.MakePage(currentIndex, currentCatalog);
-            ProcessUserInput();
+                pageManager.MakePage(currentIndex, currentCatalog);
+                ProcessUserInput();
+            }
+            else
+            {
+                Log($"[{DateTime.Now}] Отсутствует файл конфигурации. Выход из приложения");
+            }
         }
 
         static Config ReadConfig()
