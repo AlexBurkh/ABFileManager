@@ -1,28 +1,51 @@
 ﻿using System;
-using FMCore.Models.UI.Pages;
-using FMCore.Models.CatalogTree;
-using System.Linq;
 using System.IO;
+using System.Text;
+using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
+
+using FMCore.Engine;
+using FMCore.Models.UI.Pages;
+using FMCore.Models.CatalogTree;
+using System.Text.Json;
 
 namespace FMRun
 {
     internal class Program
     {
-        static int prevIndex = 0;
+        static readonly string configPath = $"{Directory.GetCurrentDirectory()}\\appconfig.json";
+        static readonly string logDir = $"{Directory.GetCurrentDirectory()}\\log\\";
+        static readonly string errorsDir = $"{logDir}\\errors\\";
+
+        static Config appConfig;
         static int currentIndex = 0;
-        static string startCatalog = "D:\\";
-        static string currCatalog = string.Empty;
+        static string currentCatalog = string.Empty;
+
         static string sourceFileToCopy;
         static List<string> directoryCopyBuffer = new List<string>();
 
+
+
+        static PageManager pageManager;
+
         static void Main(string[] args)
         {
-            currCatalog = startCatalog;
-            PageManager pageManager = new PageManager();
-            pageManager.MakePage(currentIndex, currCatalog);
+            appConfig = ReadConfig(); 
+            pageManager = new PageManager(appConfig);
+            currentCatalog = appConfig.CurrentDir;
+            currentIndex = appConfig.CurrentIndex;
+            Directory.CreateDirectory(logDir);
+            Directory.CreateDirectory(errorsDir);
+            pageManager.MakePage(currentIndex, currentCatalog);
+            ProcessUserInput();
+        }
 
+
+        
+
+        static void ProcessUserInput()
+        {
             while (true)
             {
                 ConsoleKeyInfo keyInfo = Console.ReadKey();
@@ -30,117 +53,215 @@ namespace FMRun
                 switch (keyInfo.Key)
                 {
                     case ConsoleKey.UpArrow:
-                        if (currentIndex > 0)
                         {
-                            currentIndex -= 1;
-                            pageManager.MakePage(currentIndex, currCatalog);
+                            if (currentIndex > 0)
+                            {
+                                currentIndex -= 1;
+                                pageManager.MakePage(currentIndex, currentCatalog);
+                            }
                         }
                         continue;
                     case ConsoleKey.DownArrow:
-                        if (currentIndex < pageManager.MaxIndex)
                         {
-                            currentIndex += 1;
-                            pageManager.MakePage(currentIndex, currCatalog);
+                            if (currentIndex < pageManager.MaxIndex)
+                            {
+                                currentIndex += 1;
+                                pageManager.MakePage(currentIndex, currentCatalog);
+                            }
                         }
                         continue;
                     case ConsoleKey.LeftArrow:
-                        DirectoryInfo parentDir = new DirectoryInfo(pageManager.CurrentWorkDir).Parent;
-                        if (parentDir != null)
                         {
-                            currCatalog = parentDir.FullName;
-                            currentIndex = 0;
-                            pageManager.MakePage(currentIndex, currCatalog);
+                            DirectoryInfo parentDir = new DirectoryInfo(pageManager.CurrentWorkDir).Parent;
+                            if (parentDir != null)
+                            {
+                                currentCatalog = parentDir.FullName;
+                                currentIndex = 0;
+                                pageManager.MakePage(currentIndex, currentCatalog);
+                            }
                         }
                         continue;
                     case ConsoleKey.RightArrow:
                         {
-                            string selectedItem = pageManager.SelectedItem;
-                            if (Directory.Exists(selectedItem))
+                            string item = pageManager.SelectedItem;
+                            if (Directory.Exists(item))
                             {
-                                currCatalog = selectedItem;
+                                currentCatalog = item;
                                 currentIndex = 0;
-                                pageManager.MakePage(currentIndex, currCatalog);
+                                pageManager.MakePage(currentIndex, currentCatalog);
                             }
                         }
                         continue;
                     case ConsoleKey.Enter:
                         {
-                            string selectedItem = pageManager.SelectedItem;
-                            if (File.Exists(selectedItem))
+                            string item = pageManager.SelectedItem;
+                            if (File.Exists(item))
                             {
-                                Process.Start(new ProcessStartInfo() { FileName = selectedItem, UseShellExecute = true} );
-                                pageManager.MakePage(currentIndex, currCatalog);
-                            } 
+                                Process.Start(new ProcessStartInfo() { FileName = item, UseShellExecute = true });
+                                pageManager.MakePage(currentIndex, currentCatalog);
+                            }
                         }
                         continue;
                     case ConsoleKey.F1:
                         {
-                            var selectedItem = pageManager.SelectedItem;
-                            if (Directory.Exists(selectedItem))
+                            string item = pageManager.SelectedItem;
+                            string status = string.Empty;
+                            if (Directory.Exists(item))
                             {
-                                CopyDirectory(selectedItem);
+                                WalkDirectory(item);
+                                if (directoryCopyBuffer != null)
+                                {
+                                    status = $"Каталог {item} скопирован в память";
+                                    Log(status);
+                                }
                             }
                             else
                             {
-                                sourceFileToCopy = selectedItem;
-                                pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} выбран для копирования";
-                                pageManager.MakePage(currentIndex, currCatalog);
+                                status = CopyFile(item);
+                                Log($"Файл {item} скопирован в память");
                             }
+                            pageManager.Status = status;
+                            pageManager.MakePage(currentIndex, currentCatalog);
                         }
                         continue;
-
-
-                    // В копировании папки есть ошибка. Скопированное содержимое каталога вставляетсся не в него, а рядом с ним.
                     case ConsoleKey.F2:
+                        {
+                            string item = pageManager.SelectedItem;
+                            string status = string.Empty;
+                            if (Directory.Exists(item))
+                            {
+                                if (!string.IsNullOrWhiteSpace(sourceFileToCopy))
+                                {
+                                    status = PasteFile(item);
+                                }
+                                else
+                                {
+                                    status = PasteDirectory(item);
+                                    directoryCopyBuffer.Clear();
+                                }
+                            }
+                            pageManager.Status = status;
+                            pageManager.MakePage(currentIndex, currentCatalog);
+                        }
+                        continue;
+                    case ConsoleKey.F3:
                         {
                             var selectedItem = pageManager.SelectedItem;
                             if (Directory.Exists(selectedItem))
                             {
-                                if (! string.IsNullOrWhiteSpace(sourceFileToCopy))
+                                WalkDirectory(selectedItem);
+
+                                for (int i = directoryCopyBuffer.Count - 1; i >= 0; i--)
                                 {
                                     try
                                     {
-                                        File.Copy(sourceFileToCopy, selectedItem);
-                                        sourceFileToCopy = string.Empty;
-                                        pageManager.Status = $"Файл {new FileInfo(selectedItem).Name} скопирован в каталог {currCatalog}\\";
-                                    }
-                                    catch
-                                    {
-
-                                    }
-                                    
-                                }
-                                else
-                                {
-                                    if (directoryCopyBuffer != null)
-                                    {
-                                        for (int i = 0; i < directoryCopyBuffer.Count; i++)
+                                        if (Directory.Exists(directoryCopyBuffer[i]))
                                         {
-                                            try
-                                            {
-                                                if (Directory.Exists(directoryCopyBuffer[i]))
-                                                {
-                                                    Directory.CreateDirectory($"{selectedItem}\\{new DirectoryInfo(directoryCopyBuffer[i]).Name}");
-                                                }
-                                                File.Copy(directoryCopyBuffer[i], $"{selectedItem}\\{new FileInfo(directoryCopyBuffer[i]).Name}");
-                                            }
-                                            catch
-                                            {
-                                                continue;
-                                            }
+                                            Directory.Delete(directoryCopyBuffer[i]);
+                                            continue;
                                         }
+                                        File.Delete(directoryCopyBuffer[i]);
+                                        Log($"{directoryCopyBuffer[i]} удален" + '\n');
                                     }
+                                    catch (Exception ex)
+                                    {
+                                        Log(ex);
+                                    }
+                                }
+
+                                directoryCopyBuffer.Clear();
+                            }
+                            else
+                            {
+                                string status = string.Empty;
+                                try
+                                {
+                                    File.Delete(selectedItem);
+                                    status = $"Файл {selectedItem} удален";
+                                    pageManager.Status = status;
+                                    Log(status + '\n');
+                                }
+                                catch (Exception ex)
+                                {
+                                    status = $"Ошибка удаления файла {selectedItem}";
+                                    pageManager.Status = status;
+                                    Log(ex);
                                 }
                             }
-                            pageManager.MakePage(currentIndex, currCatalog);
+                            pageManager.MakePage(currentIndex, currentCatalog);
+                        }
+                        continue;
+                    case ConsoleKey.Escape:
+                    case ConsoleKey.F10:
+                        break;
+                    default:
+                        {
+                            if ((keyInfo.Key > ConsoleKey.A) && (keyInfo.Key < ConsoleKey.Z))
+                            {
+                                ChangeDrive((char) keyInfo.Key);
+                            }
                         }
                         continue;
                 }
+                SaveState();
                 break;
             }
         }
 
-        static void CopyDirectory(string dirPath)
+
+        static void SaveState()
+        {
+            appConfig.CurrentDir = currentCatalog;
+            appConfig.CurrentIndex = currentIndex;
+            try
+            {
+                string json = JsonSerializer.Serialize<Config>(appConfig);
+                File.WriteAllText(configPath, json);
+                Log($"Текущее состояние файлового менеджера сохранено в файле конфигурации {configPath}");
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+            }
+            
+        }
+        static Config ReadConfig()
+        {
+            try
+            {
+                string json = File.ReadAllText(configPath);
+                Config config = JsonSerializer.Deserialize<Config>(json);
+                return config;
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+                return null;
+            }
+        }
+        static void ChangeDrive(char path)
+        {
+            string possibleLogicalDrive = $"{path}:\\";
+            if (Directory.Exists(possibleLogicalDrive))
+            {
+                currentCatalog = possibleLogicalDrive;
+                pageManager.Status = $"Выполнен переход к логическому диску: {possibleLogicalDrive}";
+            }
+            else
+            {
+                pageManager.Status = $"Логический диск: {possibleLogicalDrive} не обнаружен";
+            }
+            pageManager.MakePage(currentIndex, currentCatalog);
+            ProcessUserInput();
+        }
+        static string CopyFile(string filePath)
+        {
+            sourceFileToCopy = filePath;
+            string status = $"Файл {new FileInfo(filePath).Name} выбран для копирования";
+            Log(status + '\n');
+            return status;
+        }
+        static void WalkDirectory(string dirPath)
         {
             try
             {
@@ -156,14 +277,75 @@ namespace FMRun
                     DirectoryInfo[] dirs = root.GetDirectories();
                     for(int i = 0; i < dirs.Length; i++)
                     {
-                        CopyDirectory(dirs[i].FullName);
+                        WalkDirectory(dirs[i].FullName);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Log(ex);
             }
+        }
+        static string PasteDirectory(string dirPath)
+        {
+            if (directoryCopyBuffer != null)
+            {
+                string pathForSave = dirPath;
+                for (int i = 0; i < directoryCopyBuffer.Count; i++)
+                {
+                    try
+                    {
+                        if (Directory.Exists(directoryCopyBuffer[i]))
+                        {
+                            pathForSave += $"\\{new DirectoryInfo(directoryCopyBuffer[i]).Name}";
+                            Directory.CreateDirectory(pathForSave);
+                        }
+                        File.Copy(directoryCopyBuffer[i], $"{pathForSave}\\{new FileInfo(directoryCopyBuffer[i]).Name}");
+                        Log($"{directoryCopyBuffer[i]} скопирован" + '\n');
+                    }
+                    catch (Exception ex)
+                    {
+                        Log(ex);
+                        continue;
+                    }
+                }
+                return $"Каталог {directoryCopyBuffer[0]} скопирован в каталог {dirPath}";
+            }
+            return string.Empty;
+        }
+        static string PasteFile(string filePath)
+        {
+            try
+            {
+                File.Copy(sourceFileToCopy, $"{filePath}\\{new FileInfo(sourceFileToCopy).Name}");
+                sourceFileToCopy = string.Empty;
+                Log($"{sourceFileToCopy} скопирован" + '\n');
+                return $"Файл {new FileInfo(sourceFileToCopy).Name} скопирован в каталог {currentCatalog}\\";
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+                return string.Empty;
+            }
+        }
+
+        static void Log(string logText)
+        {
+            if (string.IsNullOrWhiteSpace(logText))
+            {
+                return;
+            }
+
+            string exceptionsDir = errorsDir;
+            string logFilePath = $"{logDir}INFO.txt";
+
+            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {logText}"); ;
+        }
+        static void Log(Exception ex)
+        {
+            string logFilePath = $"{errorsDir}{ex.GetType()}.error";
+
+            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}");
         }
     }
 }

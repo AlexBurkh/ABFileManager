@@ -20,7 +20,16 @@ namespace FMCore.Engine
         public static void WriteAt(string text, (int x, int y) position)
         {
             Console.SetCursorPosition(position.x, position.y);
-            Console.Write(text);
+            int lineLength = Models.UI.Pages.Page.PageWidth - 4;
+            if (text.Length < lineLength)
+            {
+                Console.Write(text);
+            }
+            else
+            {
+                Console.Write(text.Substring(0, lineLength));
+            }
+            
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using FMCore.Engine;
 using FMCore.Models.CatalogTree;
 using FMCore.Models.UI.Pages;
 
@@ -91,11 +92,11 @@ namespace FMCore.Models.UI.Pages
             _previousSelectedItemIndex = _selectedItemIndex;
         }
 
-        public PageManager()
+        public PageManager(Config appConfig)
         {
             _tree = new FileSystemTree();
             _currentPageContentStartIndex = 0;
-            _currentPage = new Page();
+            _currentPage = new Page(appConfig.LinesOnPage);
         }
     }
 }

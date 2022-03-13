@@ -15,13 +15,12 @@ namespace FMCore.Models.UI.Pages
     internal class Page
     {
         /* ПОЛЯ */
-        private string _currentDir;
         /* Константы  */
         private static readonly ConsoleColor    _background                 =    ConsoleColor.Blue;         // Фоновый цвет консоли
-        private static readonly int             _textHeight                 =    30;                        // Количество строк, выделенных под отрисовку контента страницы
+        private static int                      _textHeight                 =    30;                        // Количество строк, выделенных под отрисовку контента страницы
         private static readonly int             _porpertiesHeight           =    9;                         // количество строк (вместе с границей) для окна свойств
-        private static readonly int             _pageHeight                 =    40;                        // Количество строк, выделенных под отрисовку окна в целом
-        private static readonly int             _pageWidth                  =    120;                       // Количество столбцов, выделенных под отрисовку окна в целом
+        private static readonly int             _pageHeight                 =    _textHeight + 10;          // Количество строк, выделенных под отрисовку окна в целом
+        private static readonly int             _pageWidth                  =    200;                       // Количество столбцов, выделенных под отрисовку окна в целом
 
         // Важные используемые на странице сущности
         private CommonBorder                    _commonBorder;                                              // Внешняя граница окна
@@ -52,6 +51,10 @@ namespace FMCore.Models.UI.Pages
         public static int TextHeight
         {
             get { return _textHeight; }
+        }
+        public static int PageWidth
+        {
+            get { return _pageWidth; }
         }
 
 
@@ -106,6 +109,12 @@ namespace FMCore.Models.UI.Pages
             return (false, -1);
         }
 
+        /* Internal */
+        internal string GetFullNameFromContentString(string contentString)
+        {
+            return contentString.Split(new char[] { '─' }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
+        }
+
         /* Private */
         private void            PrintPageContent()
         {
@@ -132,10 +141,6 @@ namespace FMCore.Models.UI.Pages
             }
             Console.SetCursorPosition(_statusBarCoord.x, _statusBarCoord.y);
         }
-        internal string         GetFullNameFromContentString(string contentString)
-        {
-            return contentString.Split(new char[] { '─' }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
-        }
         private ConsoleColor    ColorFilesAndDirs(string path)
         {
             if (Directory.Exists(path))
@@ -150,8 +155,9 @@ namespace FMCore.Models.UI.Pages
 
 
         /* КОНСТРУКТОРЫ */
-        public Page()
+        public Page(int text_height)
         {
+            _textHeight = text_height;
             this._commonBorder = new CommonBorder(_pageHeight, _pageWidth);
             this._propertiesBorder = new PropertiesBorder(_porpertiesHeight , _pageWidth);
         }
