@@ -31,19 +31,33 @@ namespace FMRun
 
         static void Main(string[] args)
         {
+            
             appConfig = ReadConfig(); 
             pageManager = new PageManager(appConfig);
             currentCatalog = appConfig.CurrentDir;
             currentIndex = appConfig.CurrentIndex;
             Directory.CreateDirectory(logDir);
             Directory.CreateDirectory(errorsDir);
+
             pageManager.MakePage(currentIndex, currentCatalog);
             ProcessUserInput();
         }
 
 
-        
-
+        static Config ReadConfig()
+        {
+            try
+            {
+                string json = File.ReadAllText(configPath);
+                Config config = JsonSerializer.Deserialize<Config>(json);
+                return config;
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+                return null;
+            }
+        }
         static void ProcessUserInput()
         {
             while (true)
@@ -208,37 +222,6 @@ namespace FMRun
             }
         }
 
-
-        static void SaveState()
-        {
-            appConfig.CurrentDir = currentCatalog;
-            appConfig.CurrentIndex = currentIndex;
-            try
-            {
-                string json = JsonSerializer.Serialize<Config>(appConfig);
-                File.WriteAllText(configPath, json);
-                Log($"Текущее состояние файлового менеджера сохранено в файле конфигурации {configPath}");
-            }
-            catch (Exception ex)
-            {
-                Log(ex);
-            }
-            
-        }
-        static Config ReadConfig()
-        {
-            try
-            {
-                string json = File.ReadAllText(configPath);
-                Config config = JsonSerializer.Deserialize<Config>(json);
-                return config;
-            }
-            catch (Exception ex)
-            {
-                Log(ex);
-                return null;
-            }
-        }
         static void ChangeDrive(char path)
         {
             string possibleLogicalDrive = $"{path}:\\";
@@ -254,13 +237,7 @@ namespace FMRun
             pageManager.MakePage(currentIndex, currentCatalog);
             ProcessUserInput();
         }
-        static string CopyFile(string filePath)
-        {
-            sourceFileToCopy = filePath;
-            string status = $"Файл {new FileInfo(filePath).Name} выбран для копирования";
-            Log(status + '\n');
-            return status;
-        }
+
         static void WalkDirectory(string dirPath)
         {
             try
@@ -275,7 +252,7 @@ namespace FMRun
                         directoryCopyBuffer.Add(files[i].FullName);
                     }
                     DirectoryInfo[] dirs = root.GetDirectories();
-                    for(int i = 0; i < dirs.Length; i++)
+                    for (int i = 0; i < dirs.Length; i++)
                     {
                         WalkDirectory(dirs[i].FullName);
                     }
@@ -286,6 +263,14 @@ namespace FMRun
                 Log(ex);
             }
         }
+        static string CopyFile(string filePath)
+        {
+            sourceFileToCopy = filePath;
+            string status = $"Файл {new FileInfo(filePath).Name} выбран для копирования";
+            Log(status + '\n');
+            return status;
+        }
+        
         static string PasteDirectory(string dirPath)
         {
             if (directoryCopyBuffer != null)
@@ -346,6 +331,22 @@ namespace FMRun
             string logFilePath = $"{errorsDir}{ex.GetType()}.error";
 
             File.AppendAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}");
+        }
+        static void SaveState()
+        {
+            appConfig.CurrentDir = currentCatalog;
+            appConfig.CurrentIndex = currentIndex;
+            try
+            {
+                string json = JsonSerializer.Serialize<Config>(appConfig);
+                File.WriteAllText(configPath, json);
+                Log($"Текущее состояние файлового менеджера сохранено в файле конфигурации {configPath}");
+            }
+            catch (Exception ex)
+            {
+                Log(ex);
+            }
+
         }
     }
 }
