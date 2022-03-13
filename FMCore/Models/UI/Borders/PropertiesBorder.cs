@@ -20,7 +20,6 @@ namespace FMCore.Models.UI.Borders
             }
             sb.Append(RIGHTCENTER);
             sb.Append('\n');
-            sb.Append('\n');
             sb.AppendLine($"\tИмя:     ");
             sb.AppendLine($"\tСоздан:  ");
             sb.AppendLine($"\tИзменен: ");

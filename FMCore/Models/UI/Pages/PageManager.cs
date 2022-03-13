@@ -44,56 +44,65 @@ namespace FMCore.Models.UI.Pages
 
         public void MakePage(int selectedItemIndex, string workDir)
         {
-            _selectedItemIndex = selectedItemIndex;
-            _currentWorkDir = workDir;
-
-            _treeContent = new List<string>(_tree.LoadTree(workDir).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
-
-            if (_currentPageContentStartIndex > (_treeContent.Count - Page.TextHeight))
+            string prevCatalog = _currentWorkDir;
+            try
             {
-                _currentPageContentStartIndex = 0;
-                _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, (_treeContent.Count < Page.TextHeight) ? _treeContent.Count : Page.TextHeight);
-            }
-            else
-            {
-                _currentPage.PageContent = (_treeContent.Count > Page.TextHeight) ? _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight) : _treeContent.GetRange(0, _treeContent.Count);
-            }
+                _selectedItemIndex = selectedItemIndex;
+                _currentWorkDir = workDir;
 
-            _maxIndex = _treeContent.Count - 1;
+                _treeContent = new List<string>(_tree.LoadTree(workDir).Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
 
-            if (_selectedItemIndex >= _treeContent.Count)
-            {
-                _currentPageContentStartIndex = 0;
-                this.MakePage(_currentPageContentStartIndex, new DirectoryInfo(workDir).Parent.FullName);
-            }
-
-            (bool isOnPage, int itemIndex) = _currentPage.IsOnPage(_treeContent[_selectedItemIndex]);
-            if (isOnPage)
-            {
-                _currentPage.Print(itemIndex, _status);
-            }
-            else
-            {
-                int index;
-                if (_selectedItemIndex > _previousSelectedItemIndex)
+                if (_currentPageContentStartIndex > (_treeContent.Count - Page.TextHeight))
                 {
-                    index = Page.TextHeight - 1;
-
-                    _currentPageContentStartIndex += 1;
+                    _currentPageContentStartIndex = 0;
+                    _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, (_treeContent.Count < Page.TextHeight) ? _treeContent.Count : Page.TextHeight);
                 }
                 else
                 {
-                    if (_currentPageContentStartIndex > 0)
-                    {
-                        _currentPageContentStartIndex -= 1;
-                    }
-                    
-                    index = 0;
+                    _currentPage.PageContent = (_treeContent.Count > Page.TextHeight) ? _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight) : _treeContent.GetRange(0, _treeContent.Count);
                 }
-                _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight);
-                _currentPage.Print(index, _status);
+
+                _maxIndex = _treeContent.Count - 1;
+
+                if (_selectedItemIndex >= _treeContent.Count)
+                {
+                    _currentPageContentStartIndex = 0;
+                    this.MakePage(_currentPageContentStartIndex, new DirectoryInfo(workDir).Parent.FullName);
+                }
+
+                (bool isOnPage, int itemIndex) = _currentPage.IsOnPage(_treeContent[_selectedItemIndex]);
+                if (isOnPage)
+                {
+                    _currentPage.Print(itemIndex, _status);
+                }
+                else
+                {
+                    int index;
+                    if (_selectedItemIndex > _previousSelectedItemIndex)
+                    {
+                        index = Page.TextHeight - 1;
+
+                        _currentPageContentStartIndex += 1;
+                    }
+                    else
+                    {
+                        if (_currentPageContentStartIndex > 0)
+                        {
+                            _currentPageContentStartIndex -= 1;
+                        }
+
+                        index = 0;
+                    }
+                    _currentPage.PageContent = _treeContent.GetRange(_currentPageContentStartIndex, Page.TextHeight);
+                    _currentPage.Print(index, _status);
+                }
+                _previousSelectedItemIndex = _selectedItemIndex;
             }
-            _previousSelectedItemIndex = _selectedItemIndex;
+            catch (Exception ex)
+            {
+                _status = "Невозможно получить доступ к указанному объекту";
+                MakePage(0, prevCatalog);
+            }
         }
 
         public PageManager(Config appConfig)

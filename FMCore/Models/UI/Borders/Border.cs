@@ -16,6 +16,8 @@ namespace FMCore.Models.UI.Borders
         protected static readonly char VERTICAL = '\u2551';
         protected static readonly char LEFTCENTER = '\u2560';
         protected static readonly char RIGHTCENTER = '\u2563';
+        protected static readonly char UPCENTER = '\u2566';
+        protected static readonly char DOWNCENTER = '\u2569';
 
         public int borderHeight { get; private set; }
         public int borderWidth { get; private set; }

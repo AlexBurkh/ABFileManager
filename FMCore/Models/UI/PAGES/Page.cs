@@ -19,10 +19,12 @@ namespace FMCore.Models.UI.Pages
         private static readonly ConsoleColor    _background                 =    ConsoleColor.Blue;         // Фоновый цвет консоли
         private static int                      _textHeight                 =    30;                        // Количество строк, выделенных под отрисовку контента страницы
         private static readonly int             _porpertiesHeight           =    9;                         // количество строк (вместе с границей) для окна свойств
+        private static readonly int             _headerHeight               =    3;                         // Количество строк, выделенных под заголовок
         private static readonly int             _pageHeight                 =    _textHeight + 10;          // Количество строк, выделенных под отрисовку окна в целом
         private static readonly int             _pageWidth                  =    200;                       // Количество столбцов, выделенных под отрисовку окна в целом
 
         // Важные используемые на странице сущности
+        private Header                          _header;                                                    // Заголовок
         private CommonBorder                    _commonBorder;                                              // Внешняя граница окна
         private PropertiesBorder                _propertiesBorder;                                          // Граница окна свойств
         private List<string>                    _pageContent;                                               // Отображаемая на этой странице часть дерева
@@ -30,16 +32,20 @@ namespace FMCore.Models.UI.Pages
         private int                             _currentIndex;                                              // Индекс текущего выбранного элемента
         private string                          _selectedItem               =    string.Empty;              // Элемент, на котором на данный момент находится указатель пользователя
 
+        // Точки для отрисовки Заголовка
+        (int x, int y)                          _headerBorderCoord          =    (0, 0);
+        (int x, int y)                          _headerContentCoord         =    (2, 1);
+
         // Точки для отрисовки границ страницы
-        (int x, int y)                          _topBorderCoor              =    (0, 0);
-        (int x, int y)                          _propBorderCoord            =    (0, _pageHeight - _porpertiesHeight); // 31
+        (int x, int y)                          _topBorderCoor              =    (0, 2);
+        (int x, int y)                          _propBorderCoord            =    (0, _pageHeight - _porpertiesHeight + _headerHeight); // 31
 
         // Точки для отрисовки контента страницы
-        (int x, int y)                          _topContentCoord            =    (2, 1);
-        (int x, int y)                          _propContentCoord           =    (17, _pageHeight - _porpertiesHeight + 2); // 33
+        (int x, int y)                          _topContentCoord            =    (2, 3);
+        (int x, int y)                          _propContentCoord           =    (17, _pageHeight - _porpertiesHeight + _headerHeight + 1); // 33
 
         // Точки для отрисовки статус-бара
-        (int x, int y)                          _statusBarCoord             =    (2, _textHeight + _porpertiesHeight);
+        (int x, int y)                          _statusBarCoord             =    (2, _textHeight + _porpertiesHeight + _headerHeight - 1);
 
 
         /* СВОЙСТВА */
@@ -81,6 +87,7 @@ namespace FMCore.Models.UI.Pages
 
             /* Отрисовка границ */
             ConsoleUtils.WriteColoredAt(_commonBorder.Draw(), _topBorderCoor, Page._background);       // Отрисовка внешней границы
+            ConsoleUtils.WriteColoredAt(_header.Draw(), _headerBorderCoord, Page._background);         // Отрисовка границ заголовка
             ConsoleUtils.WriteColoredAt(_propertiesBorder.Draw(), _propBorderCoord, Page._background); // Отрисовка границы окна свойств
 
             if ( ! string.IsNullOrWhiteSpace(status))
@@ -118,6 +125,9 @@ namespace FMCore.Models.UI.Pages
         /* Private */
         private void            PrintPageContent()
         {
+            ConsoleUtils.WriteColoredAt("F1 - копировать", _headerContentCoord, _background);
+            ConsoleUtils.WriteColoredAt("F2 - вставить", (_headerContentCoord.x + 18, _headerContentCoord.y), _background);
+            ConsoleUtils.WriteColoredAt("F3 - удалить", (_headerContentCoord.x + 36, _headerContentCoord.y), _background);
             for (int i = 0; i < _pageContent.Count; i++)
             {
                 ConsoleColor foreground = (i == _currentIndex) ? ConsoleColor.DarkRed : ColorFilesAndDirs(GetFullNameFromContentString(_pageContent[i]));
@@ -198,6 +208,7 @@ namespace FMCore.Models.UI.Pages
         public Page(int text_height)
         {
             _textHeight = text_height;
+            this._header = new Header(_headerHeight, _pageWidth);
             this._commonBorder = new CommonBorder(_pageHeight, _pageWidth);
             this._propertiesBorder = new PropertiesBorder(_porpertiesHeight , _pageWidth);
         }
