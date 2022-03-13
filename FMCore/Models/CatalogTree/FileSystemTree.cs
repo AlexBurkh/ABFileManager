@@ -8,6 +8,12 @@ namespace FMCore.Models.CatalogTree
 {
     internal class FileSystemTree
     {
+        /* КОНСТРУКТОРЫ */
+        public FileSystemTree()
+        {
+            _sb = new StringBuilder();
+        }
+
         /* ПОЛЯ */
         private StringBuilder _sb;     // StringBuilder для промежуточного хранения дерева каталогов (очищается перед возвратом контента)
         private DirectoryInfo _currentDir;      // Текущий корневой каталог для постройки дерева
@@ -102,12 +108,5 @@ namespace FMCore.Models.CatalogTree
             }
          
         }           // Составляет дерево относительно свойства CurrentDir - поля _currentDir
-
-
-        /* КОНСТРУКТОРЫ */
-        public FileSystemTree()
-        {
-            _sb = new StringBuilder();
-        }
     }
 }

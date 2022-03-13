@@ -14,6 +14,15 @@ namespace FMCore.Models.UI.Pages
 {
     internal class Page
     {
+        /* КОНСТРУКТОРЫ */
+        public Page(int text_height)
+        {
+            _textHeight = text_height;
+            this._header = new Header(_headerHeight, _pageWidth);
+            this._commonBorder = new CommonBorder(_pageHeight, _pageWidth);
+            this._propertiesBorder = new PropertiesBorder(_porpertiesHeight, _pageWidth);
+        }
+
         /* ПОЛЯ */
         /* Константы  */
         private static readonly ConsoleColor    _background                 =    ConsoleColor.Blue;         // Фоновый цвет консоли
@@ -63,7 +72,6 @@ namespace FMCore.Models.UI.Pages
             get { return _pageWidth; }
         }
 
-
         /* МЕТОДЫ */
         /* Static */
         public static bool IsDirectory(string fileName)
@@ -72,7 +80,7 @@ namespace FMCore.Models.UI.Pages
             return (fsItem.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
         }
         /* Public */
-        public void          Print(int currIndex, string status)
+        public void Print(int currIndex, string status)
         {
             _currentIndex = currIndex;
             _selectedItem = _pageContent[_currentIndex];
@@ -100,11 +108,11 @@ namespace FMCore.Models.UI.Pages
             /* Отрисовка контента страницы */
             PrintPageContent();
         }
-        public string        GetSelectedItem()
+        public string GetSelectedItem()
         {
             return _selectedItem;
         }
-        public (bool, int)   IsOnPage(string fSItem)
+        public (bool, int) IsOnPage(string fSItem)
         {
             for (int i = 0; i < _pageContent.Count(); i++)
             {
@@ -123,7 +131,7 @@ namespace FMCore.Models.UI.Pages
         }
 
         /* Private */
-        private void            PrintPageContent()
+        private void PrintPageContent()
         {
             ConsoleUtils.WriteColoredAt("F1 - копировать", _headerContentCoord, _background);
             ConsoleUtils.WriteColoredAt("F2 - вставить", (_headerContentCoord.x + 18, _headerContentCoord.y), _background);
@@ -138,7 +146,7 @@ namespace FMCore.Models.UI.Pages
                 PrintFSItemProperty(GetFullNameFromContentString(_pageContent[_currentIndex]));
             }
         }
-        private void            PrintFSItemProperty(string fullFSItemName)
+        private void PrintFSItemProperty(string fullFSItemName)
         {
             string[] propertyStrings;
             FileSystemInfo fsInfo = (Directory.Exists(fullFSItemName)) ? new DirectoryInfo(fullFSItemName) : new FileInfo(fullFSItemName);
@@ -191,7 +199,7 @@ namespace FMCore.Models.UI.Pages
             }
 
         }
-        private ConsoleColor    ColorFilesAndDirs(string path)
+        private ConsoleColor ColorFilesAndDirs(string path)
         {
             if (Directory.Exists(path))
             {
@@ -201,16 +209,6 @@ namespace FMCore.Models.UI.Pages
             {
                 return ConsoleColor.Black;
             }
-        }
-
-
-        /* КОНСТРУКТОРЫ */
-        public Page(int text_height)
-        {
-            _textHeight = text_height;
-            this._header = new Header(_headerHeight, _pageWidth);
-            this._commonBorder = new CommonBorder(_pageHeight, _pageWidth);
-            this._propertiesBorder = new PropertiesBorder(_porpertiesHeight , _pageWidth);
         }
     }
 }

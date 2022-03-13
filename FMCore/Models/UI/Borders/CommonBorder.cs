@@ -8,6 +8,10 @@ namespace FMCore.Models.UI.Borders
 {
     public class CommonBorder : Border
     {
+        /* КОНСТРУКТОРЫ */
+        public CommonBorder(int height, int width)
+               : base(height, width) { }
+
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();
@@ -49,9 +53,5 @@ namespace FMCore.Models.UI.Borders
             }
             return sb.ToString();
         }
-
-        public CommonBorder(int height, int width)
-            : base(height, width)
-        { }
     }
 }

@@ -8,6 +8,10 @@ namespace FMCore.Models.UI.Borders
 {
     public class PropertiesBorder : Border
     {
+        /* КОНСТРУКТОРЫ */
+        public PropertiesBorder(int height, int width)
+            : base(height, width) { }
+
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();
@@ -27,9 +31,5 @@ namespace FMCore.Models.UI.Borders
             sb.AppendLine($"\tРазмер:  ");
             return sb.ToString();
         }
-
-        public PropertiesBorder(int height, int width)
-            : base(height, width)
-        { }
     }
 }

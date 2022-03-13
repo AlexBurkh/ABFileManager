@@ -8,6 +8,7 @@ namespace FMCore.Models.UI.Borders
 {
     internal class Header : Border
     {
+        /* КОНСТРУКТОРЫ */
         public Header(int height, int width) : base(height, width)
         { }
 

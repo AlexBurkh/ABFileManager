@@ -13,6 +13,15 @@ namespace FMCore.Models.UI.Pages
 {
     public class PageManager
     {
+        /* КОНСТРУКТОРЫ */
+        public PageManager(Config appConfig)
+        {
+            _tree = new FileSystemTree();
+            _currentPageContentStartIndex = 0;
+            _currentPage = new Page(appConfig.LinesOnPage);
+        }
+
+
         /* ПОЛЯ */
         private Page            _currentPage;
         private FileSystemTree  _tree;
@@ -40,7 +49,6 @@ namespace FMCore.Models.UI.Pages
             get { return _status; }
             set { _status = value; }
         }
-
 
         public void MakePage(int selectedItemIndex, string workDir)
         {
@@ -103,13 +111,6 @@ namespace FMCore.Models.UI.Pages
                 _status = "Невозможно получить доступ к указанному объекту";
                 MakePage(0, prevCatalog);
             }
-        }
-
-        public PageManager(Config appConfig)
-        {
-            _tree = new FileSystemTree();
-            _currentPageContentStartIndex = 0;
-            _currentPage = new Page(appConfig.LinesOnPage);
         }
     }
 }

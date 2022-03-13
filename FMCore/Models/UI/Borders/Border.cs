@@ -8,6 +8,13 @@ namespace FMCore.Models.UI.Borders
 {
     public abstract class Border
     {
+        /* КОНСТРУКТОРЫ */
+        public Border(int height, int width)
+        {
+            borderHeight = height;
+            borderWidth = width;
+        }
+
         protected static readonly char LEFTTOP = '\u2554';
         protected static readonly char RIGHTTOP = '\u2557';
         protected static readonly char LEFTBOTTOM = '\u255A';
@@ -25,12 +32,6 @@ namespace FMCore.Models.UI.Borders
         public virtual string Draw()
         {
             return string.Empty;
-        }
-
-        public Border(int height, int width) 
-        {
-            borderHeight = height;
-            borderWidth = width;
         }
     }
 }
