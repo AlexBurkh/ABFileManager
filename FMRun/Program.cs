@@ -61,7 +61,7 @@ namespace FMRun
             }
             catch (Exception ex)
             {
-                Log(ex);
+                Error(ex);
                 return null;
             }
         }
@@ -186,7 +186,7 @@ namespace FMRun
                                     }
                                     catch (Exception ex)
                                     {
-                                        Log(ex);
+                                        Error(ex);
                                     }
                                 }
 
@@ -206,7 +206,7 @@ namespace FMRun
                                 {
                                     status = $"Ошибка удаления файла {selectedItem}";
                                     pageManager.Status = status;
-                                    Log(ex);
+                                    Error(ex);
                                 }
                             }
                             pageManager.MakePage(currentIndex, currentCatalog);
@@ -268,7 +268,7 @@ namespace FMRun
             }
             catch (Exception ex)
             {
-                Log(ex);
+                Error(ex);
             }
         }
         static string CopyFile(string filePath)
@@ -299,7 +299,7 @@ namespace FMRun
                     }
                     catch (Exception ex)
                     {
-                        Log(ex);
+                        Error(ex);
                         continue;
                     }
                 }
@@ -318,7 +318,7 @@ namespace FMRun
             }
             catch (Exception ex)
             {
-                Log(ex);
+                Error(ex);
                 return string.Empty;
             }
         }
@@ -335,7 +335,7 @@ namespace FMRun
 
             File.AppendAllText(logFilePath, $"[{DateTime.Now}] {logText}\n"); ;
         }
-        static void Log(Exception ex)
+        static void Error(Exception ex)
         {
             string logFilePath = $"{errorsDir}{ex.GetType()}.error";
 
@@ -352,7 +352,7 @@ namespace FMRun
             }
             catch (Exception ex)
             {
-                Log(ex);
+                Error(ex);
             }
 
         }
