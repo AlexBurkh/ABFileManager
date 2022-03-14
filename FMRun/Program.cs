@@ -47,7 +47,7 @@ namespace FMRun
             }
             else
             {
-                Log($"[{DateTime.Now}] Отсутствует файл конфигурации. Выход из приложения");
+                Log($"Отсутствует файл конфигурации. Выход из приложения");
             }
         }
 
@@ -339,7 +339,7 @@ namespace FMRun
         {
             string logFilePath = $"{errorsDir}{ex.GetType()}.error";
 
-            File.AppendAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}\n");
+            File.WriteAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}\n");
         }
         static void SaveState()
         {
