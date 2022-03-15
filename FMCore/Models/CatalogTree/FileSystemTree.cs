@@ -6,6 +6,9 @@ using System.Text;
 
 namespace FMCore.Models.CatalogTree
 {
+    /// <summary>
+    /// Обеспечивает построение дерева файлов и каталогов
+    /// </summary>
     internal class FileSystemTree
     {
         /* КОНСТРУКТОРЫ */
@@ -15,7 +18,7 @@ namespace FMCore.Models.CatalogTree
         }
 
         /* ПОЛЯ */
-        private StringBuilder _sb;     // StringBuilder для промежуточного хранения дерева каталогов (очищается перед возвратом контента)
+        private StringBuilder _sb;              // StringBuilder для промежуточного хранения дерева каталогов (очищается перед возвратом контента)
         private DirectoryInfo _currentDir;      // Текущий корневой каталог для постройки дерева
 
         /* СВОЙСТВА */
@@ -37,6 +40,11 @@ namespace FMCore.Models.CatalogTree
 
         /* МЕТОДЫ */
         /* Public */
+        /// <summary>
+        /// Обеспечивает создание дерева каталогов из указанного корневого каталога
+        /// </summary>
+        /// <param name="workDir">Корневой каталог для старта построения дерева</param>
+        /// <returns>Текущий контент StringBuilder-а (дерево файлов и каталогов)</returns>
         public string LoadTree(string workDir)
         {
             CurrentDir = new DirectoryInfo(workDir);
@@ -44,8 +52,12 @@ namespace FMCore.Models.CatalogTree
             string result = _sb.ToString();
             _sb.Clear();
             return result;
-        }       // Особое свойства, возвращает текущий контент StringBuilder-а и очищает его
+        }
         /* Private */
+        /// <summary>
+        /// Составляет дерево относительно свойства CurrentDir - поля _currentDir. Заполняет контент StringBuilder-а
+        /// </summary>
+        /// <param name="prefix">Элемент для оформления отступов между компонентами дерева</param>
         private void BuildTree(string prefix = "\t")
         {
             List<DirectoryInfo> rootDirs = new List<DirectoryInfo>(CurrentDir.GetDirectories());
@@ -107,6 +119,6 @@ namespace FMCore.Models.CatalogTree
                 _sb.AppendLine($"{prefix}└── {rootFiles[i].FullName}");
             }
          
-        }           // Составляет дерево относительно свойства CurrentDir - поля _currentDir
+        }
     }
 }

@@ -12,6 +12,9 @@ using FMCore.Models.UI.Borders;
 
 namespace FMCore.Models.UI.Pages
 {
+    /// <summary>
+    /// Обеспечивает отрисовку контента страницы
+    /// </summary>
     internal class Page
     {
         /* КОНСТРУКТОРЫ */
@@ -74,12 +77,22 @@ namespace FMCore.Models.UI.Pages
 
         /* МЕТОДЫ */
         /* Static */
+        /// <summary>
+        /// Обеспечивает проверку, является ли выбранный элемент папкой или файлом
+        /// </summary>
+        /// <param name="fileName">путь к элементу файловой системы для проверки</param>
+        /// <returns>Возвращает true, если в аргументе - каталог</returns>
         public static bool IsDirectory(string fileName)
         {
             FileSystemInfo fsItem = (Directory.Exists(fileName)) ? new DirectoryInfo(fileName) : new FileInfo(fileName);
             return (fsItem.Attributes & FileAttributes.Directory) == FileAttributes.Directory;
         }
         /* Public */
+        /// <summary>
+        /// Отрисовывает контент страницы
+        /// </summary>
+        /// <param name="currIndex">Индекс для отрисовки</param>
+        /// <param name="status">Текст для статус-бара</param>
         public void Print(int currIndex, string status)
         {
             _currentIndex = currIndex;
@@ -108,10 +121,19 @@ namespace FMCore.Models.UI.Pages
             /* Отрисовка контента страницы */
             PrintPageContent();
         }
+        /// <summary>
+        /// Находит выбранный в данный момент элемент
+        /// </summary>
+        /// <returns>Возвращает путь в системе к выбранному элементу</returns>
         public string GetSelectedItem()
         {
             return _selectedItem;
         }
+        /// <summary>
+        /// Проверяет, нахоодится ли на странице переданный в параметрах элемент
+        /// </summary>
+        /// <param name="fSItem"></param>
+        /// <returns>Возвращает кортеж, содержащий булево значение и индекс элемента, если первый элемент кортежа - true</returns>
         public (bool, int) IsOnPage(string fSItem)
         {
             for (int i = 0; i < _pageContent.Count(); i++)
@@ -125,12 +147,20 @@ namespace FMCore.Models.UI.Pages
         }
 
         /* Internal */
+        /// <summary>
+        /// Преобразовывает строку контента странцы (со всеми символами рисования) в путь файловой системы
+        /// </summary>
+        /// <param name="contentString"></param>
+        /// <returns>Возвращает путь к выбранному элементу</returns>
         internal string GetFullNameFromContentString(string contentString)
         {
             return contentString.Split(new char[] { '─' }, StringSplitOptions.RemoveEmptyEntries).Last().Trim();
         }
 
         /* Private */
+        /// <summary>
+        /// Отрисовка контента страницы, который устанавливается pageManager -ом
+        /// </summary>
         private void PrintPageContent()
         {
             ConsoleUtils.WriteColoredAt("F1 - копировать", _headerContentCoord, _background);
@@ -146,6 +176,10 @@ namespace FMCore.Models.UI.Pages
                 PrintFSItemProperty(GetFullNameFromContentString(_pageContent[_currentIndex]));
             }
         }
+        /// <summary>
+        /// Отрисовка свойств активного элемента контента страницы
+        /// </summary>
+        /// <param name="fullFSItemName"></param>
         private void PrintFSItemProperty(string fullFSItemName)
         {
             string[] propertyStrings;
@@ -181,6 +215,11 @@ namespace FMCore.Models.UI.Pages
             }
             Console.SetCursorPosition(_statusBarCoord.x, _statusBarCoord.y);
         }
+        /// <summary>
+        /// Определение размера каталога (если это не запрещено правами)
+        /// </summary>
+        /// <param name="di">Каталог для определения размера</param>
+        /// <returns>Возвращает размер в байтах</returns>
         private long DirectorySize(DirectoryInfo di)
         {
             try
@@ -199,6 +238,11 @@ namespace FMCore.Models.UI.Pages
             }
 
         }
+        /// <summary>
+        /// Возвращает цвет для отрисовки выбранного элемента контента
+        /// </summary>
+        /// <param name="path">Путь к файлу строки контента</param>
+        /// <returns>Цвет, на основе разделения: каталог - файл</returns>
         private ConsoleColor ColorFilesAndDirs(string path)
         {
             if (Directory.Exists(path))

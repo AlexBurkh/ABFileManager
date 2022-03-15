@@ -6,12 +6,19 @@ using System.Threading.Tasks;
 
 namespace FMCore.Models.UI.Borders
 {
+    /// <summary>
+    /// Класс обеспечивает отрисовку внешних границ рабочего окна
+    /// </summary>
     public class CommonBorder : Border
     {
         /* КОНСТРУКТОРЫ */
         public CommonBorder(int height, int width)
                : base(height, width) { }
 
+        /// <summary>
+        /// Формирование строки, содержащей общую границу окна
+        /// </summary>
+        /// <returns></returns>
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();

@@ -6,12 +6,19 @@ using System.Threading.Tasks;
 
 namespace FMCore.Models.UI.Borders
 {
+    /// <summary>
+    /// Класс отвечает за отрисовку границ заголовка программы
+    /// </summary>
     public class PropertiesBorder : Border
     {
         /* КОНСТРУКТОРЫ */
         public PropertiesBorder(int height, int width)
             : base(height, width) { }
 
+        /// <summary>
+        /// Формирование строки, содержащей границы области заголовка программыы
+        /// </summary>
+        /// <returns></returns>
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();

@@ -12,6 +12,10 @@ using System.Text.Json;
 
 namespace FMRun
 {
+    /// <summary>
+    /// Главный класс приложения, обеспечивающий формирование единого приложения с пользовательским интерфейсом
+    /// посредством использования механизмов сборки (.dll) FmCore
+    /// </summary>
     internal class Program
     {
         static readonly string configPath = $"{Directory.GetCurrentDirectory()}\\appconfig.json";
@@ -42,7 +46,7 @@ namespace FMRun
                 currentCatalog = appConfig.CurrentDir;
                 currentIndex = startIndex;
 
-                pageManager.MakePage(currentIndex, currentCatalog);
+                pageManager.MakePage(currentIndex, ref currentCatalog);
                 ProcessUserInput();
             }
             else
@@ -51,6 +55,11 @@ namespace FMRun
             }
         }
 
+        /// <summary>
+        /// Обеспечивает создание объекта класса Config, представляющего собой класс конфигурации приложения
+        /// </summary>
+        /// 
+        /// <returns>Объект класса Config</returns>
         static Config ReadConfig()
         {
             try
@@ -65,6 +74,10 @@ namespace FMRun
                 return null;
             }
         }
+
+        /// <summary>
+        /// Обеспечивает обработку нажатия пользователем клавиш для выполнения команд
+        /// </summary>
         static void ProcessUserInput()
         {
             while (true)
@@ -78,7 +91,7 @@ namespace FMRun
                             if (currentIndex > 0)
                             {
                                 currentIndex -= 1;
-                                pageManager.MakePage(currentIndex, currentCatalog);
+                                pageManager.MakePage(currentIndex, ref currentCatalog);
                             }
                         }
                         continue;
@@ -87,7 +100,7 @@ namespace FMRun
                             if (currentIndex < pageManager.MaxIndex)
                             {
                                 currentIndex += 1;
-                                pageManager.MakePage(currentIndex, currentCatalog);
+                                pageManager.MakePage(currentIndex, ref currentCatalog);
                             }
                         }
                         continue;
@@ -98,7 +111,7 @@ namespace FMRun
                             {
                                 currentCatalog = parentDir.FullName;
                                 currentIndex = 0;
-                                pageManager.MakePage(currentIndex, currentCatalog);
+                                pageManager.MakePage(currentIndex, ref currentCatalog);
                             }
                         }
                         continue;
@@ -109,7 +122,7 @@ namespace FMRun
                             {
                                 currentCatalog = item;
                                 currentIndex = 0;
-                                pageManager.MakePage(currentIndex, currentCatalog);
+                                pageManager.MakePage(currentIndex, ref currentCatalog);
                             }
                         }
                         continue;
@@ -119,7 +132,7 @@ namespace FMRun
                             if (File.Exists(item))
                             {
                                 Process.Start(new ProcessStartInfo() { FileName = item, UseShellExecute = true });
-                                pageManager.MakePage(currentIndex, currentCatalog);
+                                pageManager.MakePage(currentIndex, ref currentCatalog);
                             }
                         }
                         continue;
@@ -142,7 +155,7 @@ namespace FMRun
                                 Log($"Файл {item} скопирован в память");
                             }
                             pageManager.Status = status;
-                            pageManager.MakePage(currentIndex, currentCatalog);
+                            pageManager.MakePage(currentIndex, ref currentCatalog);
                         }
                         continue;
                     case ConsoleKey.F2:
@@ -162,7 +175,7 @@ namespace FMRun
                                 }
                             }
                             pageManager.Status = status;
-                            pageManager.MakePage(currentIndex, currentCatalog);
+                            pageManager.MakePage(currentIndex, ref currentCatalog);
                         }
                         continue;
                     case ConsoleKey.F3:
@@ -209,7 +222,7 @@ namespace FMRun
                                     Error(ex);
                                 }
                             }
-                            pageManager.MakePage(currentIndex, currentCatalog);
+                            pageManager.MakePage(currentIndex, ref currentCatalog);
                         }
                         continue;
                     case ConsoleKey.Escape:
@@ -230,6 +243,10 @@ namespace FMRun
             }
         }
 
+        /// <summary>
+        /// Обеспечивает обнаружение и переход по логическим дискам по их метке, вводимой пользователем с клавиатуры
+        /// </summary>
+        /// <param name="path">Метка диска для перемещения</param>
         static void ChangeDrive(char path)
         {
             string possibleLogicalDrive = $"{path}:\\";
@@ -242,10 +259,15 @@ namespace FMRun
             {
                 pageManager.Status = $"Логический диск: {possibleLogicalDrive} не обнаружен";
             }
-            pageManager.MakePage(currentIndex, currentCatalog);
+            pageManager.MakePage(currentIndex, ref currentCatalog);
             ProcessUserInput();
         }
 
+        /// <summary>
+        /// Обеспечивает рекурсивный обход директории, указанной в параметрах и сохранение 
+        /// путей к файлам и папкам в буферный список (что-то наподобие стека)
+        /// </summary>
+        /// <param name="dirPath">Путь к каталогу для сохранения его внутренней структуры</param>
         static void WalkDirectory(string dirPath)
         {
             try
@@ -271,6 +293,12 @@ namespace FMRun
                 Error(ex);
             }
         }
+
+        /// <summary>
+        /// Обеспечивает сохранение пути к файлу, который необходимо скопировать в специальное поле
+        /// </summary>
+        /// <param name="filePath">Путь к файлу для копирования</param>
+        /// <returns>Статус запрошенной операции</returns>
         static string CopyFile(string filePath)
         {
             sourceFileToCopy = filePath;
@@ -279,6 +307,11 @@ namespace FMRun
             return status;
         }
         
+        /// <summary>
+        /// СОздать структуру каталогов и файлов в указанном каталоге из специального буфера
+        /// </summary>
+        /// <param name="dirPath">Путь для копирования</param>
+        /// <returns>Статус операции</returns>
         static string PasteDirectory(string dirPath)
         {
             if (directoryCopyBuffer != null)
@@ -307,6 +340,12 @@ namespace FMRun
             }
             return string.Empty;
         }
+
+        /// <summary>
+        /// Вставка файла. Источник - буферное поле, назначение - аргумент
+        /// </summary>
+        /// <param name="filePath">Путь для вставки файла</param>
+        /// <returns>Статус операции</returns>
         static string PasteFile(string filePath)
         {
             try
@@ -323,6 +362,10 @@ namespace FMRun
             }
         }
 
+        /// <summary>
+        /// Обеспечивает логгирование
+        /// </summary>
+        /// <param name="logText">Текст, который включается в лог</param>
         static void Log(string logText)
         {
             if (string.IsNullOrWhiteSpace(logText))
@@ -335,12 +378,21 @@ namespace FMRun
 
             File.AppendAllText(logFilePath, $"[{DateTime.Now}] {logText}\n"); ;
         }
+
+        /// <summary>
+        /// Перегрузка метода логгирования для журналирования ошибок
+        /// </summary>
+        /// <param name="ex">Объект исключения</param>
         static void Error(Exception ex)
         {
             string logFilePath = $"{errorsDir}{ex.GetType()}.error";
 
             File.WriteAllText(logFilePath, $"[{DateTime.Now}] {ex.Message}\n");
         }
+
+        /// <summary>
+        /// Обеспечивает сохранение состояния приложения в файл конфигурации (каталог и настройка вывода строк на экран) 
+        /// </summary>
         static void SaveState()
         {
             appConfig.CurrentDir = currentCatalog;

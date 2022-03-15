@@ -12,6 +12,10 @@ namespace FMCore.Models.UI.Borders
         public Header(int height, int width) : base(height, width)
         { }
 
+        /// <summary>
+        /// Формирование строки, содержащей границу окна свойств выбранного элемента
+        /// </summary>
+        /// <returns></returns>
         public override string Draw()
         {
             StringBuilder sb = new StringBuilder();

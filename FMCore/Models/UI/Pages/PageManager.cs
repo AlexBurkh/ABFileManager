@@ -11,6 +11,9 @@ using FMCore.Models.UI.Pages;
 
 namespace FMCore.Models.UI.Pages
 {
+    /// <summary>
+    /// Отвечает за управление контентом странц на основе файлового дерева
+    /// </summary>
     public class PageManager
     {
         /* КОНСТРУКТОРЫ */
@@ -50,7 +53,12 @@ namespace FMCore.Models.UI.Pages
             set { _status = value; }
         }
 
-        public void MakePage(int selectedItemIndex, string workDir)
+        /// <summary>
+        /// Формирует контент страницы, дает команду объекту класса Page, содержащемся в поле _currentPage на ее отрисовку
+        /// </summary>
+        /// <param name="selectedItemIndex">Индекс для подсветки выбранного элемента</param>
+        /// <param name="workDir">Каталог для создания дерева и отрисовки</param>
+        public void MakePage(int selectedItemIndex, ref string workDir)
         {
             string prevCatalog = _currentWorkDir;
             try
@@ -75,7 +83,7 @@ namespace FMCore.Models.UI.Pages
                 if (_selectedItemIndex >= _treeContent.Count)
                 {
                     _currentPageContentStartIndex = 0;
-                    this.MakePage(_currentPageContentStartIndex, new DirectoryInfo(workDir).Parent.FullName);
+                    workDir = prevCatalog;
                 }
 
                 (bool isOnPage, int itemIndex) = _currentPage.IsOnPage(_treeContent[_selectedItemIndex]);
@@ -109,7 +117,8 @@ namespace FMCore.Models.UI.Pages
             catch (Exception ex)
             {
                 _status = "Невозможно получить доступ к указанному объекту";
-                MakePage(0, prevCatalog);
+                _previousSelectedItemIndex = 0;
+                workDir = prevCatalog;
             }
         }
     }
