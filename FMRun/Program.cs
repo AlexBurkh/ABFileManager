@@ -42,12 +42,15 @@ namespace FMRun
             if (appConfig is not null)
             {
                 Log($"[{DateTime.Now}] Прочитан конфигурационный файл. Приложение запущено");
-                pageManager = new PageManager(appConfig);
-                currentCatalog = appConfig.CurrentDir;
-                currentIndex = startIndex;
+                if (appConfig.LinesOnPage < 34)
+                {
+                    pageManager = new PageManager(appConfig);
+                    currentCatalog = appConfig.CurrentDir;
+                    currentIndex = startIndex;
 
-                pageManager.MakePage(currentIndex, ref currentCatalog);
-                ProcessUserInput();
+                    pageManager.MakePage(currentIndex, ref currentCatalog);
+                    ProcessUserInput();
+                }
             }
             else
             {
